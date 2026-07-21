@@ -484,7 +484,6 @@ function initializeDatabase() {
       created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
       updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
       FOREIGN KEY (employee_id) REFERENCES employees(id),
-      FOREIGN KEY (offense_category_id) REFERENCES offense_categories(id),
       FOREIGN KEY (created_by) REFERENCES users(id)
     );
 
