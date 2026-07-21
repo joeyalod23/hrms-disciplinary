@@ -21,4 +21,10 @@ ENV UPLOADS_DIR=/app/data/uploads
 
 EXPOSE 3000
 
-CMD ["./entrypoint.sh"]
+RUN echo '#!/bin/sh' > /docker-entrypoint.sh && \
+    echo 'mkdir -p /app/data/db /app/data/uploads' >> /docker-entrypoint.sh && \
+    echo 'chown -R node:node /app/data' >> /docker-entrypoint.sh && \
+    echo 'exec su -s /bin/sh node -c "node server.js"' >> /docker-entrypoint.sh && \
+    chmod +x /docker-entrypoint.sh
+
+CMD ["/bin/sh", "/docker-entrypoint.sh"]
