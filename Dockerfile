@@ -13,7 +13,7 @@ RUN npm ci --omit=dev
 
 COPY . .
 
-RUN mkdir -p data/db data/uploads && chown -R node:node /app
+RUN chmod +x entrypoint.sh
 
 ENV NODE_ENV=production
 ENV DB_PATH=/app/data/db/sitevigil.db
@@ -21,6 +21,4 @@ ENV UPLOADS_DIR=/app/data/uploads
 
 EXPOSE 3000
 
-USER node
-
-CMD ["node", "server.js"]
+CMD ["./entrypoint.sh"]
