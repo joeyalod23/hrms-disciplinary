@@ -1,0 +1,21 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 100" width="900" height="100">
+  <defs>
+    <style>
+      .logo-text {
+        font-family: 'Arial Black', 'Arial', 'Helvetica', sans-serif;
+        font-weight: 900;
+        font-style: italic;
+        fill: #f0f0f0;
+        font-size: 28px;
+        letter-spacing: 7px;
+      }
+    </style>
+  </defs>
+  <rect x="0" y="0" width="900" height="3" fill="#0b1a3a"/>
+  <rect x="0" y="3" width="900" height="94" fill="#0b1a3a"/>
+  <rect x="0" y="97" width="900" height="3" fill="#0b1a3a"/>
+  <rect x="0" y="18" width="900" height="3" fill="#ffffff"/>
+  <rect x="0" y="79" width="900" height="3" fill="#ffffff"/>
+  <text x="450" y="57" class="logo-text" text-anchor="middle" transform="skewX(-14)">L.V. LEDESMA CONSTRUCTION, INC.</text>
+  <line x1="897" y1="0" x2="897" y2="100" stroke="#ffffff" stroke-width="1" opacity="0.25"/>
+</svg>

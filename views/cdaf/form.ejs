@@ -1,0 +1,98 @@
+<div class="container-fluid px-4 py-4">
+  <div class="d-flex justify-content-between align-items-center mb-4">
+    <h4 class="fw-bold"><i class="bi bi-plus-square"></i> New Corrective Disciplinary Action</h4>
+    <div>
+      <small class="text-muted me-3">F-HRD-049 Rev 0</small>
+      <a href="/cdaf" class="btn btn-outline-secondary"><i class="bi bi-arrow-left"></i> Back</a>
+    </div>
+  </div>
+  <% if (typeof error !== 'undefined' && error) { %>
+    <div class="alert alert-danger"><%= error %></div>
+  <% } %>
+  <div class="card border-0 shadow-sm">
+    <div class="card-body">
+      <form method="POST" action="/cdaf/add">
+        <div class="row g-3">
+          <div class="col-12"><h6 class="fw-bold text-primary border-bottom pb-2"><i class="bi bi-person-badge"></i> Employee & Offense Details</h6></div>
+          <div class="col-md-6">
+            <label class="form-label">Employee *</label>
+            <div style="position:relative;">
+              <input type="text" class="form-control" id="employeeSearch" placeholder="Type employee name or ID..." autocomplete="off" required>
+              <input type="hidden" name="employee_id" id="employeeId">
+              <div id="employeeResults" style="position:absolute;top:100%;left:0;right:0;z-index:1000;max-height:250px;overflow-y:auto;background:#fff;border:1px solid #ccc;border-radius:4px;display:none;box-shadow:0 4px 8px rgba(0,0,0,.1);"></div>
+            </div>
+          </div>
+          <div class="col-md-6">
+            <label class="form-label">Offense Category (Light/Minor only) *</label>
+            <select name="offense_category_id" class="form-select" required>
+              <option value="">-- Select --</option>
+              <% lightOffenses.forEach(o => { %>
+                <option value="<%= o.id %>"><%= o.name %> (<%= o.severity %>)</option>
+              <% }) %>
+            </select>
+          </div>
+          <div class="col-md-4">
+            <label class="form-label">Incident Date *</label>
+            <input type="date" name="incident_date" class="form-control" value="<%= today %>" required>
+          </div>
+          <div class="col-md-8">
+            <label class="form-label">Description of Offense *</label>
+            <textarea name="description" class="form-control" rows="2" placeholder="Describe what happened..." required></textarea>
+          </div>
+          <div class="col-12"><h6 class="fw-bold text-primary border-bottom pb-2 mt-2"><i class="bi bi-chat-dots"></i> Action Details</h6></div>
+          <div class="col-md-4">
+            <label class="form-label">Action Type *</label>
+            <select name="action_type" class="form-select" required>
+              <option value="Verbal Reprimand">Verbal Reprimand (1st Offense)</option>
+              <option value="Written Reprimand">Written Reprimand (2nd Offense)</option>
+            </select>
+          </div>
+          <div class="col-md-4">
+            <label class="form-label">Counselled By</label>
+            <input type="text" name="counselled_by" class="form-control" placeholder="Department Head / HR">
+          </div>
+          <div class="col-md-4">
+            <label class="form-label">Counselling Date</label>
+            <input type="date" name="counselling_date" class="form-control" value="<%= today %>">
+          </div>
+          <div class="col-12">
+            <label class="form-label">Counselling Notes</label>
+            <textarea name="counselling_notes" class="form-control" rows="2" placeholder="Summary of counselling session..."></textarea>
+          </div>
+        </div>
+        <div class="mt-4">
+          <button type="submit" class="btn btn-primary"><i class="bi bi-save"></i> Create CDAF</button>
+          <a href="/cdaf" class="btn btn-outline-secondary">Cancel</a>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+<script>
+const employees = <%- JSON.stringify(employees || []) %>;
+const empSearch = document.getElementById('employeeSearch');
+const empId = document.getElementById('employeeId');
+const empResults = document.getElementById('employeeResults');
+empSearch.addEventListener('input', function() {
+  const q = this.value.toLowerCase();
+  if (!q) { empResults.style.display = 'none'; empId.value = ''; return; }
+  const matches = employees.filter(e => e.full_name.toLowerCase().includes(q) || e.employee_id.includes(q)).slice(0, 20);
+  if (matches.length === 0) { empResults.style.display = 'none'; return; }
+  empResults.innerHTML = matches.map(e =>
+    '<div class="emp-item" data-id="' + e.id + '" data-name="' + e.full_name + '" style="padding:8px 12px;cursor:pointer;border-bottom:1px solid #eee;font-size:14px;">' +
+      '<strong>' + e.employee_id + '</strong> - ' + e.full_name + ' <span style="color:#666;font-size:12px;">(' + e.department + ')</span>' +
+    '</div>'
+  ).join('');
+  empResults.style.display = 'block';
+});
+empResults.addEventListener('click', function(e) {
+  const item = e.target.closest('.emp-item');
+  if (!item) return;
+  empId.value = item.dataset.id;
+  empSearch.value = item.dataset.name;
+  empResults.style.display = 'none';
+});
+document.addEventListener('click', function(e) {
+  if (!e.target.closest('#employeeSearch') && !e.target.closest('#employeeResults')) empResults.style.display = 'none';
+});
+</script>

@@ -1,0 +1,967 @@
+<style>
+  .leave-card { transition: all .2s; }
+  .leave-card:hover { transform: translateY(-2px); box-shadow: 0 4px 12px rgba(0,0,0,.08); }
+  .status-pending { background: #fef3cd; color: #856404; }
+  .status-approved { background: #d4edda; color: #155724; }
+  .status-denied { background: #f8d7da; color: #721c24; }
+  .awol-alert { border-left: 4px solid #dc3545; }
+</style>
+<div class="container-fluid px-4 py-4">
+  <div class="d-flex justify-content-between align-items-center mb-4">
+    <h4 class="fw-bold"><i class="bi bi-clock"></i> Attendance & Leave Monitoring</h4>
+    <div>
+      <a href="/attendance/upload" class="btn btn-info text-white"><i class="bi bi-upload"></i> Import .dat</a>
+      <a href="/attendance/add" class="btn btn-primary"><i class="bi bi-plus-lg"></i> Add Record</a>
+      <button type="button" class="btn btn-warning" data-bs-toggle="modal" data-bs-target="#quickLeaveModal"><i class="bi bi-calendar-minus"></i> Add Leave</button>
+      <a href="/attendance/summary" class="btn btn-outline-secondary"><i class="bi bi-table"></i> View Summary</a>
+      <a href="/attendance/export?month=<%= month %>&year=<%= year %>" class="btn btn-success"><i class="bi bi-download"></i> Export CSV</a>
+    </div>
+  </div>
+
+  <ul class="nav nav-tabs mb-4" id="attTabs" role="tablist">
+    <li class="nav-item" role="presentation">
+      <button class="nav-link active" id="records-tab" data-bs-toggle="tab" data-bs-target="#records" type="button" role="tab"><i class="bi bi-clock me-1"></i> Attendance Records</button>
+    </li>
+    <li class="nav-item" role="presentation">
+      <button class="nav-link" id="leave-tab" data-bs-toggle="tab" data-bs-target="#leaveMon" type="button" role="tab"><i class="bi bi-calendar-check me-1"></i> Leave Monitoring
+        <% const pendingLeaves = leaves.filter(l => l.status === 'Pending').length; %>
+        <% if (pendingLeaves > 0) { %><span class="badge bg-warning ms-1"><%= pendingLeaves %></span><% } %>
+      </button>
+    </li>
+  </ul>
+
+  <div class="tab-content">
+    <!-- ═══ TAB 1: Attendance Records ═══ -->
+    <div class="tab-pane fade show active" id="records" role="tabpanel">
+      <div class="card border-0 shadow-sm mb-4">
+        <div class="card-body">
+          <div class="row g-2">
+            <div class="col-6 col-md">
+              <a href="/attendance?filter=active" class="text-decoration-none d-block border-start border-4 border-primary ps-2 py-1 rounded-end" style="transition:background .15s" onmouseover="this.style.background='#e8f0fe'" onmouseout="this.style.background=''">
+                <div class="fs-4 fw-bold text-primary"><%= totalActive %></div>
+                <small class="text-muted">Active Employees</small>
+              </a>
+            </div>
+            <div class="col-6 col-md">
+              <a href="/attendance?filter=present" class="text-decoration-none d-block border-start border-4 border-success ps-2 py-1 rounded-end" style="transition:background .15s" onmouseover="this.style.background='#e6f4ea'" onmouseout="this.style.background=''">
+                <div class="fs-4 fw-bold text-success"><%= todayPresent %></div>
+                <small class="text-muted">Present <br><%= statsDate %></small>
+              </a>
+            </div>
+            <div class="col-6 col-md">
+              <a href="/attendance?filter=late" class="text-decoration-none d-block border-start border-4 border-warning ps-2 py-1 rounded-end" style="transition:background .15s" onmouseover="this.style.background='#fef7e0'" onmouseout="this.style.background=''">
+                <div class="fs-4 fw-bold text-warning"><%= todayLate %></div>
+                <small class="text-muted">Late <br><%= statsDate %></small>
+              </a>
+            </div>
+            <div class="col-6 col-md">
+              <a href="/attendance?filter=halfday" class="text-decoration-none d-block border-start border-4 border-secondary ps-2 py-1 rounded-end" style="transition:background .15s" onmouseover="this.style.background='#f0f0f0'" onmouseout="this.style.background=''">
+                <div class="fs-4 fw-bold text-secondary"><%= todayHalfDay %></div>
+                <small class="text-muted">Half Day <br><%= statsDate %></small>
+              </a>
+            </div>
+            <div class="col-6 col-md">
+              <a href="/attendance?filter=leave" class="text-decoration-none d-block border-start border-4 border-info ps-2 py-1 rounded-end" style="transition:background .15s" onmouseover="this.style.background='#e0f7fa'" onmouseout="this.style.background=''">
+                <div class="fs-4 fw-bold text-info"><%= todayLeave %></div>
+                <small class="text-muted">On Leave <br><%= statsDate %></small>
+              </a>
+            </div>
+            <div class="col-6 col-md">
+              <a href="/attendance?filter=norecord" class="text-decoration-none d-block border-start border-4 border-danger ps-2 py-1 rounded-end" style="transition:background .15s" onmouseover="this.style.background='#fdecea'" onmouseout="this.style.background=''">
+                <div class="fs-4 fw-bold text-danger"><%= todayNoRecord + todayAbsentStatus + todayAwol %></div>
+                <small class="text-muted">Absent <br><%= statsDate %></small>
+                <div class="small text-muted">No Record: <%= todayNoRecord %> | Absent: <%= todayAbsentStatus %> | AWOL: <%= todayAwol %></div>
+              </a>
+            </div>
+            <% if (todayHoliday > 0) { %>
+            <div class="col-6 col-md">
+              <div class="border-start border-4 border-dark ps-2">
+                <div class="fs-4 fw-bold text-dark"><%= todayHoliday %></div>
+                <small class="text-muted">Holiday <br><%= statsDate %></small>
+              </div>
+            </div>
+            <% } %>
+          </div>
+        </div>
+      </div>
+
+      <% if (isTodayView && todayOnLeaveList.length > 0) { %>
+      <div class="card border-0 shadow-sm mb-4">
+        <div class="card-body py-3">
+          <div class="d-flex justify-content-between align-items-center mb-2">
+            <h6 class="fw-bold mb-0"><i class="bi bi-calendar-check me-1"></i> On Leave Today — <%= today %></h6>
+            <span class="badge bg-info"><%= todayOnLeaveList.length %> employee(s)</span>
+          </div>
+          <div class="d-flex flex-wrap gap-2 mt-2">
+            <% todayOnLeaveList.forEach(emp => { %>
+            <span class="badge bg-<%= emp.status === 'Sick Leave' ? 'warning' : emp.status === 'Emergency Leave' ? 'danger' : 'primary' %> fs-6 px-3 py-2">
+              <%= emp.full_name %> <small class="opacity-75">(<%= emp.status %>)</small>
+            </span>
+            <% }) %>
+          </div>
+        </div>
+      </div>
+      <% } %>
+
+      <div class="card border-0 shadow-sm mb-4">
+        <div class="card-header bg-white py-3">
+          <h6 class="fw-bold mb-0"><i class="bi bi-graph-up me-1"></i> Daily Attendance Trend (Last 30 Days)</h6>
+        </div>
+        <div class="card-body">
+          <canvas id="dailyTrendChart" height="80"></canvas>
+        </div>
+      </div>
+
+      <div class="card border-0 shadow-sm">
+        <div class="card-body">
+          <form method="GET" class="row g-2 mb-3">
+            <div class="col-md-3">
+              <input type="text" name="search" class="form-control" placeholder="Search by employee name or ID..." value="<%= search %>">
+            </div>
+            <div class="col-md-2">
+              <label class="visually-hidden" for="dateFrom">Date From</label>
+              <input type="date" id="dateFrom" name="date_from" class="form-control" value="<%= dateFrom %>" placeholder="From">
+            </div>
+            <div class="col-md-2">
+              <label class="visually-hidden" for="dateTo">Date To</label>
+              <input type="date" id="dateTo" name="date_to" class="form-control" value="<%= dateTo %>" placeholder="To">
+            </div>
+            <div class="col-md-1">
+              <button type="submit" class="btn btn-outline-primary w-100"><i class="bi bi-search"></i></button>
+            </div>
+            <div class="col-md-1">
+              <a href="/attendance" class="btn btn-outline-secondary w-100"><i class="bi bi-x-lg"></i></a>
+            </div>
+            <div class="col-md-3 d-flex gap-1 align-items-center">
+              <span class="text-muted small">or filter by</span>
+              <select name="month" class="form-select form-select-sm" style="width:auto">
+                <% months.forEach(m => { %>
+                  <option value="<%= m.value %>" <%= month === m.value ? 'selected' : '' %>><%= m.name %></option>
+                <% }) %>
+              </select>
+              <input type="number" name="year" class="form-control form-control-sm" style="width:80px" value="<%= year %>" min="2020" max="2099">
+              <button type="submit" class="btn btn-sm btn-outline-primary"><i class="bi bi-filter"></i></button>
+            </div>
+          </form>
+          <div class="d-flex justify-content-between align-items-center mb-2">
+            <% const filterLabels = { present: 'Present', late: 'Late', halfday: 'Half Day', leave: 'On Leave', absent: 'Absent + AWOL', norecord: 'No Record (Absent)', active: 'All Active Employees' }; %>
+            <% if (filter) { %>
+              <span class="badge bg-danger fs-6"><i class="bi bi-funnel"></i> Filtered: <%= filterLabels[filter] || filter %></span>
+              <a href="/attendance" class="btn btn-sm btn-outline-danger"><i class="bi bi-x-circle"></i> Clear Filter</a>
+            <% } else if (isTodayView) { %>
+              <span class="badge bg-primary fs-6"><i class="bi bi-calendar-day"></i> Today — <%= today %></span>
+              <a href="/attendance?view=all" class="btn btn-sm btn-outline-secondary"><i class="bi bi-calendar3"></i> Show All (Month)</a>
+            <% } else { %>
+              <span class="badge bg-secondary fs-6"><i class="bi bi-calendar3"></i> Showing: <%= months.find(m => m.value === month)?.name %> <%= year %></span>
+              <a href="/attendance" class="btn btn-sm btn-outline-primary"><i class="bi bi-calendar-day"></i> Back to Today</a>
+            <% } %>
+          </div>
+          <% if (filter === 'leave') { %>
+          <div class="row g-3 mb-3 mt-1">
+            <div class="col-12">
+              <div class="card border-0 bg-light">
+                <div class="card-body py-3">
+                  <div class="d-flex justify-content-between align-items-center mb-2">
+                    <h6 class="fw-bold mb-0"><i class="bi bi-calendar-check me-1"></i> Leave Report — <%= months.find(m => m.value === month)?.name %> <%= year %></h6>
+                    <span class="badge bg-info"><%= todayOnLeaveList.length %> on leave today</span>
+                  </div>
+                  <% if (leaveByType.length > 0) { %>
+                  <div class="row g-2 mb-2">
+                    <% const leaveColorMap = { 'Filed Leave': 'primary', 'Sick Leave': 'warning', 'Emergency Leave': 'danger' }; %>
+                    <% leaveByType.forEach(lt => { %>
+                    <div class="col-auto">
+                      <span class="badge bg-<%= leaveColorMap[lt.status] || 'secondary' %> fs-6 px-3 py-2">
+                        <%= lt.status %>: <strong><%= lt.count %></strong>
+                      </span>
+                    </div>
+                    <% }) %>
+                  </div>
+                  <% } %>
+                  <% if (leaveMonthStats.length > 0) { %>
+                  <div class="table-responsive mt-2">
+                    <table class="table table-sm table-bordered mb-0" style="font-size:.8rem">
+                      <thead class="table-light">
+                        <tr><th>Leave Type</th><th class="text-center">Total Apps</th><th class="text-center">Pending</th><th class="text-center">Approved</th><th class="text-center">Denied</th><th class="text-center">Days Used</th></tr>
+                      </thead>
+                      <tbody>
+                        <% leaveMonthStats.forEach(ms => { %>
+                        <tr>
+                          <td><span class="badge bg-info"><%= ms.type_code %></span> <%= ms.type_name %></td>
+                          <td class="text-center fw-bold"><%= ms.total_apps %></td>
+                          <td class="text-center"><span class="badge bg-warning"><%= ms.pending %></span></td>
+                          <td class="text-center"><span class="badge bg-success"><%= ms.approved %></span></td>
+                          <td class="text-center"><span class="badge bg-danger"><%= ms.denied %></span></td>
+                          <td class="text-center fw-bold"><%= ms.total_days %> days</td>
+                        </tr>
+                        <% }) %>
+                      </tbody>
+                    </table>
+                  </div>
+                  <% } else { %>
+                  <p class="text-muted small mb-0 mt-1">No leave applications for this month.</p>
+                  <% } %>
+                  <% if (todayOnLeaveList.length > 0) { %>
+                  <div class="mt-2">
+                    <small class="fw-bold text-muted">TODAY'S ON-LEAVE EMPLOYEES:</small>
+                    <div class="d-flex flex-wrap gap-1 mt-1">
+                      <% todayOnLeaveList.forEach(emp => { %>
+                      <span class="badge bg-<%= emp.status === 'Sick Leave' ? 'warning' : emp.status === 'Emergency Leave' ? 'danger' : 'primary' %>">
+                        <%= emp.full_name %> <small class="opacity-75">(<%= emp.status %>)</small>
+                      </span>
+                      <% }) %>
+                    </div>
+                  </div>
+                  <% } %>
+                </div>
+              </div>
+            </div>
+          </div>
+          <% } %>
+          <div class="table-responsive">
+            <table class="table table-sm table-hover mb-0">
+              <thead class="table-light">
+                <tr>
+                  <th>Emp ID</th>
+                  <th>Name</th>
+                  <th>Position</th>
+                  <th>Date</th>
+                  <th>AM In<br><small class="fw-normal">7:30-12:00</small></th>
+                  <th>AM Out<br><small class="fw-normal">7:30-12:00</small></th>
+                  <th>PM In<br><small class="fw-normal">1:00-4:30</small></th>
+                  <th>PM Out<br><small class="fw-normal">1:00-4:30</small></th>
+                  <th>OT In</th>
+                  <th>OT Out</th>
+                  <th>OT Hours</th>
+                  <th>ND (min)</th>
+                  <th>Status</th>
+                  <th>Tardiness</th>
+                  <th>Missing</th>
+                  <th>Remarks</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody>
+                <% if (records.length === 0) { %>
+                  <tr><td colspan="17" class="text-center text-muted py-4"><% if (isTodayView) { %>No attendance records for today yet.<% } else { %>No attendance records found<% } %></td></tr>
+                <% } else { %>
+                  <% records.forEach(r => { %>
+                  <tr>
+                    <td><%= r.employee_id %></td>
+                    <td class="fw-medium"><%= r.full_name %></td>
+                    <td><%= r.position %></td>
+                    <td><%= r.date ? new Date(r.date).toLocaleDateString() : today %></td>
+                    <td><%= r.am_in || '-' %></td>
+                    <td><%= r.am_out || '-' %></td>
+                    <td><%= r.pm_in || '-' %></td>
+                    <td><%= r.pm_out || '-' %></td>
+                    <td><%= r.ot_in || '-' %></td>
+                    <td><%= r.ot_out || '-' %></td>
+                    <td class="fw-bold"><%= r.ot_hours > 0 ? r.ot_hours.toFixed(2) : '-' %></td>
+                    <td><%= r.nd_minutes > 0 ? r.nd_minutes : '-' %></td>
+                    <td>
+                      <% const badgeMap = { 'Present': 'success', 'Late': 'warning', 'Half Day': 'info', 'Absent': 'danger', 'Sick Leave': 'secondary', 'Filed Leave': 'primary', 'Emergency Leave': 'dark', 'AWOL': 'danger', 'Holiday': 'light' }; %>
+                      <span class="badge bg-<%= badgeMap[r.status] || 'secondary' %>"><%= r.status %></span>
+                    </td>
+                    <td><%= r.tardiness_minutes %> min</td>
+                    <td><% if (r.missing_punches) { %><span class="badge bg-danger"><%= r.missing_punches %></span><% } else { %>-<% } %></td>
+                    <td><%= r.remarks || '' %></td>
+                    <td>
+                      <% if (r.status !== 'No Record') { %>
+                      <a href="/attendance/edit/<%= r.id %>" class="btn btn-sm btn-outline-warning" title="Edit"><i class="bi bi-pencil"></i></a>
+                      <a href="/attendance/delete/<%= r.id %>" class="btn btn-sm btn-outline-danger" title="Delete" onclick="return confirm('Delete this record?')"><i class="bi bi-trash"></i></a>
+                      <% } else { %>
+                      <span class="text-muted">—</span>
+                      <% } %>
+                    </td>
+                  </tr>
+                  <% }) %>
+                <% } %>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ═══ TAB 2: Leave Monitoring ═══ -->
+    <div class="tab-pane fade" id="leaveMon" role="tabpanel">
+      <% const leavePending = leaves.filter(l => l.status === 'Pending').length; %>
+      <% const leaveApproved = leaves.filter(l => l.status === 'Approved').length; %>
+      <% const leaveDenied = leaves.filter(l => l.status === 'Denied').length; %>
+
+      <div class="row g-3 mb-4">
+        <div class="col-md-3">
+          <div class="card border-0 shadow-sm leave-card">
+            <div class="card-body text-center py-3">
+              <h4 class="fw-bold text-warning mb-0"><%= leavePending %></h4>
+              <small class="text-muted">Pending Applications</small>
+            </div>
+          </div>
+        </div>
+        <div class="col-md-3">
+          <div class="card border-0 shadow-sm leave-card">
+            <div class="card-body text-center py-3">
+              <h4 class="fw-bold text-success mb-0"><%= leaveApproved %></h4>
+              <small class="text-muted">Approved</small>
+            </div>
+          </div>
+        </div>
+        <div class="col-md-3">
+          <div class="card border-0 shadow-sm leave-card">
+            <div class="card-body text-center py-3">
+              <h4 class="fw-bold text-danger mb-0"><%= awolAlerts.length %></h4>
+              <small class="text-muted">AWOL Alerts</small>
+            </div>
+          </div>
+        </div>
+        <div class="col-md-3">
+          <div class="card border-0 shadow-sm leave-card">
+            <div class="card-body text-center py-3">
+              <h4 class="fw-bold text-info mb-0"><%= silStats.credited %>/<%= silStats.total_active %></h4>
+              <small class="text-muted">SIL Credited</small>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <% if (awolAlerts.length > 0) { %>
+      <div class="alert alert-danger d-flex align-items-center gap-2 mb-4">
+        <i class="bi bi-exclamation-triangle-fill fs-4"></i>
+        <div><strong><%= awolAlerts.length %> attendance exception(s)</strong> require HR review.</div>
+      </div>
+      <% } %>
+
+      <ul class="nav nav-pills mb-4" id="leaveSubTabs" role="tablist">
+        <li class="nav-item" role="presentation">
+          <button class="nav-link active" id="ltimeline-tab" data-bs-toggle="tab" data-bs-target="#ltimeline" type="button" role="tab"><i class="bi bi-calendar-week me-1"></i> Leave Timeline
+            <% const ongoingLeaves = (typeof leaveTimeline !== 'undefined') ? leaveTimeline.filter(l => l.isOngoing).length : 0; %>
+            <% if (ongoingLeaves > 0) { %><span class="badge bg-danger ms-1"><%= ongoingLeaves %></span><% } %>
+          </button>
+        </li>
+        <li class="nav-item" role="presentation">
+          <button class="nav-link" id="lapp-tab" data-bs-toggle="tab" data-bs-target="#lapp" type="button" role="tab"><i class="bi bi-list me-1"></i> Leave Applications</button>
+        </li>
+        <li class="nav-item" role="presentation">
+          <button class="nav-link" id="lsil-tab" data-bs-toggle="tab" data-bs-target="#lsil" type="button" role="tab"><i class="bi bi-gift me-1"></i> SIL Monitoring</button>
+        </li>
+        <li class="nav-item" role="presentation">
+          <button class="nav-link" id="lbal-tab" data-bs-toggle="tab" data-bs-target="#lbal" type="button" role="tab"><i class="bi bi-pie-chart me-1"></i> Leave Balances</button>
+        </li>
+        <li class="nav-item" role="presentation">
+          <button class="nav-link" id="lawol-tab" data-bs-toggle="tab" data-bs-target="#lawol" type="button" role="tab"><i class="bi bi-exclamation-triangle me-1"></i> AWOL Exceptions
+            <% if (awolAlerts.length > 0) { %><span class="badge bg-danger ms-1"><%= awolAlerts.length %></span><% } %>
+          </button>
+        </li>
+      </ul>
+
+      <div class="tab-content">
+        <!-- Leave Daily Timeline -->
+        <div class="tab-pane fade show active" id="ltimeline" role="tabpanel">
+          <% if (leaveTimeline.length === 0) { %>
+          <div class="card border-0 shadow-sm">
+            <div class="card-body text-center py-5">
+              <i class="bi bi-calendar-check fs-1 text-muted"></i>
+              <p class="text-muted mt-2 mb-0">No active or upcoming leaves.</p>
+            </div>
+          </div>
+          <% } else { %>
+          <% const ongoing = leaveTimeline.filter(l => l.isOngoing); const upcoming = leaveTimeline.filter(l => !l.isOngoing && !l.isFinished); const finished = leaveTimeline.filter(l => l.isFinished); %>
+
+          <% if (ongoing.length > 0) { %>
+          <h6 class="fw-bold text-danger mb-3"><i class="bi bi-play-circle me-1"></i> Ongoing Leaves (<%= ongoing.length %>)</h6>
+          <div class="row g-3 mb-4">
+            <% ongoing.forEach(la => { %>
+            <div class="col-md-6 col-xl-4">
+              <div class="card border-0 shadow-sm h-100" style="border-left: 4px solid <%= la.leave_type_code === 'SL' ? '#ffc107' : la.leave_type_code === 'EL' ? '#dc3545' : '#0d6efd' %> !important">
+                <div class="card-body">
+                  <div class="d-flex justify-content-between align-items-start mb-2">
+                    <div>
+                      <h6 class="fw-bold mb-0"><%= la.employee_name %></h6>
+                      <small class="text-muted"><%= la.employee_id %> &middot; <%= la.position || '' %></small>
+                    </div>
+                    <span class="badge bg-<%= la.leave_type_code === 'SL' ? 'warning' : la.leave_type_code === 'EL' ? 'danger' : 'primary' %>"><%= la.leave_type_code %></span>
+                  </div>
+                  <div class="mb-2">
+                    <small class="text-muted"><%= la.date_from %> to <%= la.date_to %> &middot; <%= la.totalWorkDays %> work day(s)</small>
+                  </div>
+                  <div class="d-flex align-items-center gap-2 mb-2">
+                    <span class="badge bg-danger fs-6">Day <%= la.currentDayNum %> of <%= la.totalWorkDays %></span>
+                    <span class="badge bg-secondary"><%= la.remaining %> day(s) left</span>
+                  </div>
+                  <div class="progress mb-2" style="height: 8px;">
+                    <div class="progress-bar bg-<%= la.leave_type_code === 'SL' ? 'warning' : la.leave_type_code === 'EL' ? 'danger' : 'primary' %>" style="width: <%= Math.round((la.currentDayNum / la.totalWorkDays) * 100) %>%"></div>
+                  </div>
+                  <div class="d-flex flex-wrap gap-1">
+                    <% la.days.forEach(dy => { %>
+                    <span class="badge rounded-pill px-2 py-1
+                      <%= dy.isToday ? 'bg-danger text-white' : dy.isPast ? 'bg-secondary' : 'bg-outline-secondary border' %>
+                    " style="font-size: .7rem;">
+                      <% if (dy.isToday) { %>&#9679; <% } %>D<%= dy.dayNum %> <small><%= new Date(dy.date + 'T00:00:00').toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' }) %></small>
+                    </span>
+                    <% }) %>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <% }) %>
+          </div>
+          <% } %>
+
+          <% if (upcoming.length > 0) { %>
+          <h6 class="fw-bold text-warning mb-3"><i class="bi bi-clock-history me-1"></i> Upcoming Leaves (<%= upcoming.length %>)</h6>
+          <div class="row g-3 mb-4">
+            <% upcoming.forEach(la => { %>
+            <div class="col-md-6 col-xl-4">
+              <div class="card border-0 shadow-sm h-100" style="border-left: 4px solid <%= la.leave_type_code === 'SL' ? '#ffc107' : la.leave_type_code === 'EL' ? '#dc3545' : '#0d6efd' %> !important">
+                <div class="card-body">
+                  <div class="d-flex justify-content-between align-items-start mb-2">
+                    <div>
+                      <h6 class="fw-bold mb-0"><%= la.employee_name %></h6>
+                      <small class="text-muted"><%= la.employee_id %> &middot; <%= la.position || '' %></small>
+                    </div>
+                    <span class="badge bg-<%= la.leave_type_code === 'SL' ? 'warning' : la.leave_type_code === 'EL' ? 'danger' : 'primary' %>"><%= la.leave_type_code %></span>
+                  </div>
+                  <div class="mb-2">
+                    <small class="text-muted"><%= la.date_from %> to <%= la.date_to %> &middot; <%= la.totalWorkDays %> work day(s)</small>
+                  </div>
+                  <div class="d-flex align-items-center gap-2 mb-2">
+                    <span class="badge bg-warning text-dark fs-6">Starts in <%= la.days.filter(d => d.isFuture).length %> day(s)</span>
+                  </div>
+                  <div class="d-flex flex-wrap gap-1">
+                    <% la.days.forEach(dy => { %>
+                    <span class="badge rounded-pill px-2 py-1 bg-outline-secondary border" style="font-size: .7rem;">
+                      D<%= dy.dayNum %> <small><%= new Date(dy.date + 'T00:00:00').toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' }) %></small>
+                    </span>
+                    <% }) %>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <% }) %>
+          </div>
+          <% } %>
+
+          <% if (finished.length > 0) { %>
+          <details>
+            <summary class="fw-bold text-muted mb-3" style="cursor:pointer"><i class="bi bi-check-circle me-1"></i> Finished Leaves (<%= finished.length %>)</summary>
+            <div class="row g-3 mb-4">
+              <% finished.forEach(la => { %>
+              <div class="col-md-6 col-xl-4">
+                <div class="card border-0 shadow-sm h-100 opacity-75" style="border-left: 4px solid #6c757d !important">
+                  <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-start mb-2">
+                      <div>
+                        <h6 class="fw-bold mb-0"><%= la.employee_name %></h6>
+                        <small class="text-muted"><%= la.employee_id %></small>
+                      </div>
+                      <span class="badge bg-secondary"><%= la.leave_type_code %></span>
+                    </div>
+                    <div class="mb-2">
+                      <small class="text-muted"><%= la.date_from %> to <%= la.date_to %> &middot; <%= la.totalWorkDays %> work day(s)</small>
+                    </div>
+                    <span class="badge bg-success"><i class="bi bi-check-lg"></i> Completed</span>
+                  </div>
+                </div>
+              </div>
+              <% }) %>
+            </div>
+          </details>
+          <% } %>
+          <% } %>
+        </div>
+
+        <!-- Leave Applications -->
+        <div class="tab-pane fade" id="lapp" role="tabpanel">
+          <div class="card border-0 shadow-sm">
+            <div class="card-header bg-white py-3 d-flex justify-content-between align-items-center">
+              <h6 class="mb-0 fw-bold"><i class="bi bi-list me-2"></i>Leave Applications</h6>
+              <div class="d-flex gap-2">
+                <select class="form-select form-select-sm" style="width:auto" onchange="filterLeaveStatus(this.value)">
+                  <option value="">All Status</option>
+                  <option value="Pending">Pending</option>
+                  <option value="Approved">Approved</option>
+                  <option value="Denied">Denied</option>
+                </select>
+                <button class="btn btn-sm btn-primary" onclick="openApplyModal()"><i class="bi bi-plus-lg me-1"></i> Apply Leave</button>
+              </div>
+            </div>
+            <div class="card-body p-0">
+              <div class="table-responsive">
+                <table class="table table-hover mb-0">
+                  <thead class="table-light">
+                    <tr><th class="py-3">Employee</th><th class="py-3">Type</th><th class="py-3">From</th><th class="py-3">To</th><th class="py-3">Days</th><th class="py-3">Status</th><th class="py-3">Attachment</th><th class="py-3">Filed</th><th class="py-3"></th></tr>
+                  </thead>
+                  <tbody id="leaveTableBody"></tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- SIL Monitoring -->
+        <div class="tab-pane fade" id="lsil" role="tabpanel">
+          <div class="card border-0 shadow-sm mb-4">
+            <div class="card-header bg-white py-3 d-flex justify-content-between align-items-center">
+              <h6 class="mb-0 fw-bold"><i class="bi bi-search me-2"></i>Check SIL Eligibility</h6>
+              <div class="d-flex gap-2">
+                <select id="silEmployeeSelect" class="form-select form-select-sm" style="width:250px">
+                  <option value="">-- Select Employee --</option>
+                  <% employees.forEach(e => { %><option value="<%= e.id %>"><%= e.full_name %> (<%= e.employee_id %>)</option><% }) %>
+                </select>
+                <button class="btn btn-sm btn-outline-success" onclick="checkSilStatus()">Check</button>
+                <button class="btn btn-sm btn-success" onclick="grantSil()"><i class="bi bi-gift me-1"></i> Grant SIL</button>
+                <button class="btn btn-sm btn-outline-primary" onclick="runSilAccrual()"><i class="bi bi-gift me-1"></i> Process All</button>
+              </div>
+            </div>
+            <div class="card-body" id="silStatusResult">
+              <p class="text-muted mb-0">Select an employee and click "Check" to view SIL eligibility.</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Leave Balances -->
+        <div class="tab-pane fade" id="lbal" role="tabpanel">
+          <div class="card border-0 shadow-sm">
+            <div class="card-header bg-white py-3">
+              <h6 class="mb-0 fw-bold"><i class="bi bi-pie-chart me-2"></i>Leave Balances</h6>
+            </div>
+            <div class="card-body">
+              <div class="row g-2 mb-3">
+                <div class="col-md-4">
+                  <select id="balEmployee" class="form-select" onchange="loadBalances()">
+                    <option value="">-- Select Employee --</option>
+                    <% employees.forEach(e => { %><option value="<%= e.id %>"><%= e.full_name %> (<%= e.employee_id %>)</option><% }) %>
+                  </select>
+                </div>
+              </div>
+              <div id="balancesBody" class="table-responsive">
+                <p class="text-muted text-center py-4">Select an employee to view leave balances</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- AWOL Exceptions -->
+        <div class="tab-pane fade" id="lawol" role="tabpanel">
+          <div class="card border-0 shadow-sm">
+            <div class="card-header bg-white py-3 d-flex justify-content-between align-items-center">
+              <h6 class="mb-0 fw-bold"><i class="bi bi-exclamation-triangle me-2"></i>Attendance Exceptions</h6>
+              <div class="d-flex gap-2">
+                <button class="btn btn-sm btn-outline-danger" onclick="runAwolDetection()"><i class="bi bi-arrow-repeat me-1"></i> Run Detection</button>
+                <button class="btn btn-sm btn-outline-success" onclick="resolveAllAwol()"><i class="bi bi-check2-all me-1"></i> Resolve All Open</button>
+              </div>
+            </div>
+            <div class="card-body p-0">
+              <div class="table-responsive">
+                <table class="table table-hover mb-0">
+                  <thead class="table-light">
+                    <tr><th class="py-3">Employee</th><th class="py-3">Type</th><th class="py-3">Period</th><th class="py-3">Days</th><th class="py-3">Status</th><th class="py-3">Flagged</th><th class="py-3"></th></tr>
+                  </thead>
+                  <tbody id="awolTableBody"></tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Quick Leave Modal -->
+<div class="modal fade" id="quickLeaveModal" tabindex="-1" aria-labelledby="quickLeaveModalLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <form method="POST" action="/attendance/add-leave">
+        <div class="modal-header bg-warning">
+          <h5 class="modal-title fw-bold" id="quickLeaveModalLabel"><i class="bi bi-calendar-minus"></i> Quick Leave Entry</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+          <div class="mb-3">
+            <label class="form-label fw-bold">Employee <span class="text-danger">*</span></label>
+            <select name="employee_id" class="form-select" required>
+              <option value="">Select employee...</option>
+              <% employees.forEach(e => { %>
+                <option value="<%= e.id %>"><%= e.full_name %> (<%= e.employee_id %>)</option>
+              <% }) %>
+            </select>
+          </div>
+          <div class="mb-3">
+            <label class="form-label fw-bold">Leave Type <span class="text-danger">*</span></label>
+            <select name="leave_type" class="form-select" required>
+              <option value="">Select type...</option>
+              <option value="VL">Vacation Leave (VL)</option>
+              <option value="SL">Sick Leave (SL)</option>
+              <option value="EL">Emergency Leave (EL)</option>
+              <option value="BL">Birthday Leave (BL)</option>
+              <option value="SIL">Special Leave (SIL)</option>
+            </select>
+          </div>
+          <div class="row mb-3">
+            <div class="col">
+              <label class="form-label fw-bold">From <span class="text-danger">*</span></label>
+              <input type="date" name="date_from" class="form-control" required>
+            </div>
+            <div class="col">
+              <label class="form-label fw-bold">To <span class="text-danger">*</span></label>
+              <input type="date" name="date_to" class="form-control" required>
+            </div>
+          </div>
+          <div class="mb-3">
+            <label class="form-label fw-bold">Reason</label>
+            <input type="text" name="reason" class="form-control" placeholder="Optional reason...">
+          </div>
+          <div class="alert alert-info small mb-0">
+            <i class="bi bi-info-circle"></i> This will immediately mark the employee as on leave for the selected dates and deduct from their leave credits. Weekend days (Sat/Sun) are excluded.
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+          <button type="submit" class="btn btn-warning"><i class="bi bi-check-lg"></i> Submit Leave</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+<!-- Apply Leave Modal (Formal) -->
+<div id="applyModal" class="modal fade" tabindex="-1">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header"><h5 class="modal-title">Apply for Leave</h5><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div>
+      <form onsubmit="submitLeave(event)">
+        <div class="modal-body">
+          <div class="mb-3">
+            <label class="form-label">Employee</label>
+            <select id="leaveEmployee" class="form-select" required>
+              <option value="">-- Select Employee --</option>
+              <% employees.forEach(e => { %><option value="<%= e.id %>"><%= e.full_name %> (<%= e.employee_id %>)</option><% }) %>
+            </select>
+          </div>
+          <div class="mb-3">
+            <label class="form-label">Leave Type</label>
+            <select id="leaveType" class="form-select" required>
+              <option value="">-- Select --</option>
+              <% leaveTypes.forEach(t => { %><option value="<%= t.id %>"><%= t.name %> (<%= t.code %>)</option><% }) %>
+            </select>
+          </div>
+          <div class="mb-3"><small id="balanceHint" class="text-muted"></small></div>
+          <div class="row g-2 mb-3">
+            <div class="col-6"><label class="form-label">From</label><input type="date" id="leaveFrom" class="form-control" required onchange="calcDays()"></div>
+            <div class="col-6"><label class="form-label">To</label><input type="date" id="leaveTo" class="form-control" required onchange="calcDays()"></div>
+          </div>
+          <div class="mb-3">
+            <label class="form-label">Days</label>
+            <input type="number" id="leaveDays" class="form-control" required min="0.5" step="0.5" readonly>
+          </div>
+          <div class="mb-3">
+            <label class="form-label">Reason</label>
+            <textarea id="leaveReason" class="form-control" rows="3" required></textarea>
+          </div>
+          <div class="mb-3">
+            <label class="form-label">Attachment (medical certificate, etc.)</label>
+            <input type="file" id="leaveAttachment" class="form-control" accept=".pdf,.jpg,.jpeg,.png,.webp">
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+          <button type="submit" class="btn btn-primary">Submit</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+<% scripts = '<script>const dailyTrendData = ' + JSON.stringify(dailyTrend) + ';</script><script src="/js/attendance-trend.js"></script>' %>
+<script>
+let leaves = <%- JSON.stringify(leaves) %>;
+const isAdminOrHRD = <%= user.role === 'admin' || user.role === 'hrd' %>;
+
+function esc(s) { const d = document.createElement('div'); d.textContent = s; return d.innerHTML; }
+
+function statusBadge(s) {
+  const m = { Pending: 'warning', Approved: 'success', Denied: 'danger', Cancelled: 'secondary', Open: 'danger', Resolved: 'success' };
+  return '<span class="badge bg-' + (m[s] || 'secondary') + '">' + s + '</span>';
+}
+
+function updateLeaveStats() {
+  const pending = leaves.filter(l => l.status === 'Pending').length;
+  const approved = leaves.filter(l => l.status === 'Approved').length;
+  const statCards = document.querySelectorAll('#leaveMon .leave-card h4');
+  if (statCards.length >= 2) {
+    statCards[0].textContent = pending;
+    statCards[1].textContent = approved;
+  }
+  const badge = document.querySelector('#leave-tab .badge');
+  if (pending > 0) {
+    if (badge) { badge.textContent = pending; } 
+    else { document.querySelector('#leave-tab').innerHTML = '<i class="bi bi-calendar-check me-1"></i> Leave Monitoring <span class="badge bg-warning ms-1">' + pending + '</span>'; }
+  } else if (badge) {
+    badge.remove();
+  }
+}
+
+function filterLeaveStatus(val) {
+  const filtered = val ? leaves.filter(l => l.status === val) : leaves;
+  renderLeaveTable(filtered);
+}
+
+function renderLeaveTable(list) {
+  const tbody = document.getElementById('leaveTableBody');
+  tbody.innerHTML = list.map(l => '<tr>' +
+    '<td class="py-2 fw-medium">' + esc(l.employee_name) + '<br><small class="text-muted">' + l.employee_id + '</small></td>' +
+    '<td class="py-2"><span class="badge bg-info">' + esc(l.leave_type_code) + '</span> ' + esc(l.leave_type_name) + '</td>' +
+    '<td class="py-2">' + l.date_from + '</td>' +
+    '<td class="py-2">' + l.date_to + '</td>' +
+    '<td class="py-2 fw-bold">' + l.days + '</td>' +
+    '<td class="py-2">' + statusBadge(l.status) + '</td>' +
+    '<td class="py-2">' + (l.attachment_url ? '<a href="' + l.attachment_url + '" target="_blank" class="btn btn-sm btn-outline-secondary"><i class="bi bi-paperclip"></i></a>' : '<span class="text-muted">&mdash;</span>') + '</td>' +
+    '<td class="py-2 text-muted small">' + new Date(l.created_at).toLocaleDateString() + '</td>' +
+    '<td class="py-2 text-end">' + (l.status === 'Pending' && isAdminOrHRD ? '<button class="btn btn-sm btn-success me-1" onclick="updateStatus(' + l.id + ',\'Approved\')"><i class="bi bi-check-lg"></i></button><button class="btn btn-sm btn-danger" onclick="updateStatus(' + l.id + ',\'Denied\')"><i class="bi bi-x-lg"></i></button>' : '') + '</td>' +
+  '</tr>').join('');
+}
+
+function calcDays() {
+  const from = new Date(document.getElementById('leaveFrom').value);
+  const to = new Date(document.getElementById('leaveTo').value);
+  if (from && to && to >= from) {
+    document.getElementById('leaveDays').value = Math.ceil((to - from) / 86400000) + 1;
+  }
+  checkBalance();
+}
+
+async function checkBalance() {
+  const eid = document.getElementById('leaveEmployee').value;
+  const ltid = document.getElementById('leaveType').value;
+  const hint = document.getElementById('balanceHint');
+  if (!eid || !ltid) return (hint.textContent = '');
+  try {
+    const r = await fetch('/leaves/api/balances/' + eid + '/' + ltid);
+    const bal = await r.json();
+    if (bal.available === Infinity || bal.available === null) {
+      hint.innerHTML = '<i class="bi bi-info-circle me-1"></i>Available balance: <strong>Unlimited</strong>';
+    } else {
+      hint.innerHTML = '<i class="bi bi-info-circle me-1"></i>Available balance: <strong>' + bal.available + '</strong> day(s) (Total: ' + bal.total_days + ', Used: ' + bal.used_days + ', Pending: ' + bal.pending_days + ')';
+    }
+  } catch(e) { hint.textContent = ''; }
+}
+
+async function submitLeave(e) {
+  e.preventDefault();
+  const payload = {
+    employee_id: Number(document.getElementById('leaveEmployee').value),
+    leave_type_id: Number(document.getElementById('leaveType').value),
+    date_from: document.getElementById('leaveFrom').value,
+    date_to: document.getElementById('leaveTo').value,
+    days: Number(document.getElementById('leaveDays').value),
+    reason: document.getElementById('leaveReason').value,
+  };
+  const file = document.getElementById('leaveAttachment').files[0];
+  try {
+    let res;
+    if (file) {
+      const fd = new FormData();
+      Object.entries(payload).forEach(([k, v]) => fd.append(k, v));
+      fd.append('attachment', file);
+      res = await fetch('/leaves/api/apply-with-attachment', { method: 'POST', body: fd });
+    } else {
+      res = await fetch('/leaves/api/apply', {
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload),
+      });
+    }
+    if (!res.ok) throw new Error((await res.json()).error);
+    const data = await res.json();
+    const empName = document.getElementById('leaveEmployee').options[document.getElementById('leaveEmployee').selectedIndex].text;
+    const typeName = document.getElementById('leaveType').options[document.getElementById('leaveType').selectedIndex].text;
+    const match = typeName.match(/\((\w+)\)/);
+    const code = match ? match[1] : 'VL';
+    const name = typeName.replace(/\s*\(\w+\)/, '');
+    const newLeave = {
+      id: data.id, employee_id: payload.employee_id, employee_name: empName,
+      leave_type_id: payload.leave_type_id, leave_type_code: code, leave_type_name: name,
+      date_from: payload.date_from, date_to: payload.date_to, days: payload.days,
+      reason: payload.reason, status: 'Pending', attachment_url: data.attachment_url || null,
+      created_at: new Date().toISOString()
+    };
+    leaves.unshift(newLeave);
+    renderLeaveTable(leaves);
+    updateLeaveStats();
+    bootstrap.Modal.getInstance(document.getElementById('applyModal')).hide();
+    document.getElementById('leaveEmployee').value = '';
+    document.getElementById('leaveType').value = '';
+    document.getElementById('leaveFrom').value = '';
+    document.getElementById('leaveTo').value = '';
+    document.getElementById('leaveDays').value = '';
+    document.getElementById('leaveReason').value = '';
+    document.getElementById('leaveAttachment').value = '';
+    document.getElementById('balanceHint').textContent = '';
+  } catch (e) { alert(e.message); }
+}
+
+async function updateStatus(id, status) {
+  const reason = status === 'Denied' ? prompt('Reason for denial:') : '';
+  if (status === 'Denied' && !reason) return;
+  try {
+    const res = await fetch('/leaves/api/' + id + '/status', {
+      method: 'PATCH', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ status, denied_reason: reason }),
+    });
+    if (!res.ok) { const data = await res.json(); throw new Error(data.error || 'Failed'); }
+    const leave = leaves.find(l => l.id === id);
+    if (leave) leave.status = status;
+    renderLeaveTable(leaves);
+    updateLeaveStats();
+  } catch (e) { alert(e.message); }
+}
+
+function openApplyModal() { new bootstrap.Modal(document.getElementById('applyModal')).show(); }
+
+async function loadBalances() {
+  const eid = document.getElementById('balEmployee').value;
+  const body = document.getElementById('balancesBody');
+  if (!eid) return body.innerHTML = '<p class="text-muted text-center py-4">Select an employee to view leave balances</p>';
+  try {
+    const r = await fetch('/leaves/api/balances/' + eid);
+    const bals = await r.json();
+    if (bals.length === 0) return body.innerHTML = '<p class="text-muted text-center py-4">No leave balances set up yet.</p>';
+    body.innerHTML = '<table class="table table-sm table-hover mb-0"><thead class="table-light"><tr><th>Leave Type</th><th>Code</th><th>Total Days</th><th>Used</th><th>Pending</th><th>Available</th></tr></thead><tbody>' +
+      bals.map(b => {
+        const isUnlimited = b.days_per_year === 0;
+        return '<tr>' +
+        '<td>' + esc(b.name) + '</td>' +
+        '<td><span class="badge bg-info">' + b.code + '</span></td>' +
+        '<td>' + (isUnlimited ? '<span class="text-success fw-bold">Unlimited</span>' : b.total_days) + '</td>' +
+        '<td>' + b.used_days + '</td>' +
+        '<td>' + b.pending_days + '</td>' +
+        '<td><strong class="text-' + (isUnlimited ? 'success' : (b.available > 0 ? 'success' : 'danger')) + '">' + (isUnlimited ? 'Unlimited' : b.available) + '</strong></td>' +
+      '</tr>';
+      }).join('') +
+    '</tbody></table>';
+  } catch(e) { body.innerHTML = '<p class="text-danger text-center py-4">Failed to load balances</p>'; }
+}
+
+async function updateBalance(eid, ltid) {
+  const total = document.getElementById('balTotal_' + ltid).value;
+  if (!confirm('Set total days to ' + total + '?')) return;
+  try {
+    const r = await fetch('/leaves/api/balances/update', {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ employee_id: eid, leave_type_id: ltid, total_days: Number(total) }),
+    });
+    if (!r.ok) throw new Error('Failed');
+    loadBalances();
+  } catch(e) { alert(e.message); }
+}
+
+async function checkSilStatus() {
+  const eid = document.getElementById('silEmployeeSelect').value;
+  const result = document.getElementById('silStatusResult');
+  if (!eid) return result.innerHTML = '<p class="text-muted mb-0">Select an employee and click "Check".</p>';
+  try {
+    const r = await fetch('/leaves/api/employees/' + eid + '/sil-status');
+    const data = await r.json();
+    result.innerHTML =
+      '<div class="d-flex align-items-center gap-3 mb-3">' +
+        '<div class="flex-grow-1"><h6 class="fw-bold mb-1">' + esc(data.full_name) + ' (' + esc(data.employee_id) + ')</h6>' +
+        '<small class="text-muted">Date Hired: ' + (data.date_hired || 'N/A') + ' &middot; SIL Credited: ' + (data.sil_credited ? 'Yes' : 'No') + '</small></div>' +
+        '<span class="badge ' + (data.sil_credited ? 'bg-success' : 'bg-warning') + ' fs-6 px-3 py-2">' + (data.sil_credited ? 'Credited' : 'Not Credited') + '</span>' +
+      '</div>' +
+      (data.sil_balance ?
+      '<div class="row g-2">' +
+        '<div class="col-3"><div class="border rounded p-2 text-center"><small class="d-block text-muted">Total</small><strong>' + data.sil_balance.total + '</strong></div></div>' +
+        '<div class="col-3"><div class="border rounded p-2 text-center"><small class="d-block text-muted">Used</small><strong>' + data.sil_balance.used + '</strong></div></div>' +
+        '<div class="col-3"><div class="border rounded p-2 text-center"><small class="d-block text-muted">Pending</small><strong>' + data.sil_balance.pending + '</strong></div></div>' +
+        '<div class="col-3"><div class="border rounded p-2 text-center bg-light"><small class="d-block text-muted">Available</small><strong class="text-success">' + data.sil_balance.available + '</strong></div></div>' +
+      '</div>' : '<p class="text-muted mb-0">No SIL balance record yet.</p>');
+  } catch(e) { result.innerHTML = '<p class="text-danger mb-0">Error: ' + e.message + '</p>'; }
+}
+
+async function grantSil() {
+  const eid = document.getElementById('silEmployeeSelect').value;
+  if (!eid) return alert('Select an employee first');
+  if (!confirm('Grant 5 days SIL to this employee?')) return;
+  try {
+    const r = await fetch('/leaves/api/sil/grant/' + eid, { method: 'POST' });
+    const data = await r.json();
+    alert(data.granted ? 'SIL granted: ' + data.days + ' days' : data.reason);
+    if (data.granted) checkSilStatus();
+  } catch(e) { alert(e.message); }
+}
+
+async function runSilAccrual() {
+  if (!confirm('Process SIL accrual for all eligible employees?')) return;
+  try {
+    const r = await fetch('/leaves/api/sil/process-all', { method: 'POST' });
+    const data = await r.json();
+    alert(data.granted + ' employee(s) granted SIL out of ' + data.processed + ' eligible');
+  } catch(e) { alert(e.message); }
+}
+
+async function renderAwolTable() {
+  try {
+    const r = await fetch('/leaves/api/awol-exceptions');
+    const exceptions = await r.json();
+    const tbody = document.getElementById('awolTableBody');
+    if (!tbody) return;
+    tbody.innerHTML = exceptions.map(ex =>
+      '<tr class="' + (ex.status === 'Open' ? 'awol-alert' : '') + '">' +
+        '<td class="py-2 fw-medium">' + esc(ex.employee_name) + '<br><small class="text-muted">' + ex.employee_id + '</small></td>' +
+        '<td class="py-2"><span class="badge bg-danger">' + ex.exception_type + '</span></td>' +
+        '<td class="py-2">' + ex.start_date + ' to ' + ex.end_date + '</td>' +
+        '<td class="py-2 fw-bold">' + ex.days_missed + '</td>' +
+        '<td class="py-2">' + statusBadge(ex.status) + '</td>' +
+        '<td class="py-2 text-muted small">' + new Date(ex.created_at).toLocaleDateString() + '</td>' +
+        '<td class="py-2 text-end">' + (ex.status === 'Open' && isAdminOrHRD ? '<button class="btn btn-sm btn-outline-success" onclick="resolveAwol(' + ex.id + ')"><i class="bi bi-check2-circle"></i> Resolve</button>' : '') + '</td>' +
+      '</tr>'
+    ).join('');
+  } catch(e) {}
+}
+
+async function resolveAwol(id) {
+  const resolution = prompt('Resolution notes (optional):');
+  try {
+    await fetch('/leaves/api/awol-exceptions/' + id + '/resolve', {
+      method: 'PATCH', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ resolution }),
+    });
+    renderAwolTable();
+  } catch(e) { alert(e.message); }
+}
+
+async function resolveAllAwol() {
+  if (!confirm('Resolve all open AWOL exceptions? This will clear all flags.')) return;
+  try {
+    const r = await fetch('/leaves/api/awol-exceptions/resolve-all', { method: 'POST' });
+    const data = await r.json();
+    alert(data.resolved + ' exception(s) resolved');
+    renderAwolTable();
+  } catch(e) { alert(e.message); }
+}
+
+async function runAwolDetection() {
+  try {
+    const r = await fetch('/leaves/api/detect-absenteeism', { method: 'POST' });
+    const data = await r.json();
+    alert(data.flagged + ' employee(s) flagged for AWOL');
+    if (data.flagged > 0) renderAwolTable();
+  } catch(e) { alert(e.message); }
+}
+
+function activateTabFromHash() {
+  const hash = window.location.hash;
+  if (hash === '#leave' || hash === '#leaveMon') {
+    const leaveTab = document.getElementById('leave-tab');
+    if (leaveTab) {
+      const bsTab = new bootstrap.Tab(leaveTab);
+      bsTab.show();
+    }
+  }
+}
+
+renderLeaveTable(leaves);
+renderAwolTable();
+activateTabFromHash();
+</script>
+<%- include('../partials/toast') %>

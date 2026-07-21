@@ -1,0 +1,307 @@
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+<link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.2/font/bootstrap-icons.css" rel="stylesheet">
+<script src="https://cdn.tailwindcss.com"></script>
+<style>
+  @media print { .no-print { display: none !important; } }
+  .status-badge { @apply inline-block px-2.5 py-0.5 rounded-full text-xs font-semibold; }
+  .status-hired { @apply bg-green-100 text-green-800; }
+  .status-rehired { @apply bg-emerald-100 text-emerald-800; }
+  .status-processing { @apply bg-yellow-100 text-yellow-800; }
+  .status-waiting { @apply bg-orange-100 text-orange-800; }
+  .status-backout { @apply bg-red-100 text-red-800; }
+  .status-unreachable { @apply bg-gray-100 text-gray-800; }
+  .status-tradetest { @apply bg-purple-100 text-purple-800; }
+</style>
+
+<div class="container-fluid px-4 py-4">
+  <div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+      <a href="/prf" class="text-sm text-blue-600 hover:text-blue-800 font-medium text-decoration-none">
+        <i class="bi bi-arrow-left me-1"></i> Back to PRF Monitor
+      </a>
+      <h4 class="fw-bold mt-1"><%= prf.prf_no %></h4>
+    </div>
+    <div class="d-flex gap-2 no-print">
+      <span class="badge bg-secondary fs-6"><%= prf.project_name %></span>
+    </div>
+  </div>
+
+  <!-- Stats Row -->
+  <div class="row g-3 mb-4">
+    <div class="col-md-3">
+      <div class="card border-0 shadow-sm bg-primary text-white">
+        <div class="card-body">
+          <h6>Total Requested</h6>
+          <h2 class="mb-0"><%= prf.total_manpower_requested %></h2>
+        </div>
+      </div>
+    </div>
+    <div class="col-md-3">
+      <div class="card border-0 shadow-sm bg-success text-white">
+        <div class="card-body">
+          <h6>Hired</h6>
+          <h2 class="mb-0"><%= total_hired %></h2>
+        </div>
+      </div>
+    </div>
+    <div class="col-md-3">
+      <div class="card border-0 shadow-sm bg-warning text-white">
+        <div class="card-body">
+          <h6>Pending / Processing</h6>
+          <h2 class="mb-0"><%= total_pending %></h2>
+        </div>
+      </div>
+    </div>
+    <div class="col-md-3">
+      <div class="card border-0 shadow-sm bg-<%= remaining_needed <= 0 ? 'success' : 'danger' %> text-white">
+        <div class="card-body">
+          <h6>Remaining Needed</h6>
+          <h2 class="mb-0"><%= remaining_needed %></h2>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- PRF Info Card -->
+  <div class="card border-0 shadow-sm mb-4">
+    <div class="card-header bg-white py-3 d-flex justify-content-between align-items-center">
+      <h6 class="mb-0 fw-bold"><i class="bi bi-info-circle me-2"></i>PRF Information</h6>
+    </div>
+    <div class="card-body">
+      <div class="row g-3">
+        <div class="col-md-4">
+          <p class="mb-1 text-muted small">PRF Number</p>
+          <p class="fw-medium fs-5"><%= prf.prf_no %></p>
+        </div>
+        <div class="col-md-4">
+          <p class="mb-1 text-muted small">Trade / Position</p>
+          <p class="fw-medium"><%= prf.trade_position %></p>
+        </div>
+        <div class="col-md-4">
+          <p class="mb-1 text-muted small">Project Site</p>
+          <p class="fw-medium"><%= prf.project_name %></p>
+        </div>
+        <div class="col-md-4">
+          <p class="mb-1 text-muted small">Location</p>
+          <p class="fw-medium"><%= prf.location %></p>
+        </div>
+        <div class="col-md-4">
+          <p class="mb-1 text-muted small">Total Manpower Requested</p>
+          <p class="fw-medium"><%= prf.total_manpower_requested %></p>
+        </div>
+        <div class="col-md-4">
+          <p class="mb-1 text-muted small">Date Created</p>
+          <p class="fw-medium"><%= new Date(prf.created_at).toLocaleDateString() %></p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Applicants Table -->
+  <div class="card border-0 shadow-sm">
+    <div class="card-header bg-white py-3 d-flex justify-content-between align-items-center">
+      <h6 class="mb-0 fw-bold"><i class="bi bi-people me-2"></i>Applicants (<%= applicants.length %>)</h6>
+      <button onclick="openAddApplicantModal()" class="btn btn-sm btn-success no-print">
+        <i class="bi bi-plus-lg"></i> Add Applicant
+      </button>
+    </div>
+    <div class="card-body p-0">
+      <div class="table-responsive">
+        <table class="table table-hover mb-0">
+          <thead class="table-light">
+            <tr>
+              <th>Name</th>
+              <th>Source</th>
+              <th>Status</th>
+              <th>Remarks</th>
+              <th class="no-print">Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            <% if (applicants.length === 0) { %>
+              <tr><td colspan="5" class="text-center py-4 text-muted">No applicants yet.</td></tr>
+            <% } else { %>
+              <% applicants.forEach(function(a) { %>
+                <% var s = (a.recruitment_status || '').toUpperCase(); %>
+                <% var cls = 'bg-secondary';
+                if (s.includes('HIRED')) cls = 'bg-success';
+                else if (s.includes('PROCESSING') || s.includes('ON GOING')) cls = 'bg-warning text-dark';
+                else if (s.includes('WAITING FOR')) cls = 'bg-warning text-dark';
+                else if (s.includes('FOR TRADETEST')) cls = 'bg-info';
+                else if (s.includes('BACK OUT')) cls = 'bg-danger';
+                else if (s.includes('CANNOT') || s.includes('DIDNT')) cls = 'bg-secondary'; %>
+              <tr>
+                <td class="fw-medium"><%= a.applicant_name %></td>
+                <td><%= a.sourced_from %></td>
+                <td><span class="badge <%= cls %>"><%= a.recruitment_status %></span></td>
+                <td><%= a.remarks || '' %></td>
+                <td class="no-print">
+                  <button onclick="editApplicant(<%= a.id %>)" class="btn btn-sm btn-outline-primary me-1" title="Edit">
+                    <i class="bi bi-pencil"></i>
+                  </button>
+                  <button onclick="deleteApplicant(<%= a.id %>)" class="btn btn-sm btn-outline-danger" title="Delete">
+                    <i class="bi bi-trash"></i>
+                  </button>
+                </td>
+              </tr>
+              <% }) %>
+            <% } %>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Add/Edit Applicant Modal -->
+<div id="applicantModal" class="modal fade" tabindex="-1">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content border-0 shadow-lg">
+      <form id="applicantForm" onsubmit="saveApplicant(event)">
+        <div class="modal-header bg-success text-white">
+          <h5 class="modal-title" id="applicantModalTitle"><i class="bi bi-person-plus me-1"></i>Add Applicant</h5>
+          <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+        </div>
+        <div class="modal-body">
+          <input type="hidden" id="applicantId" value="" />
+          <input type="hidden" id="applicantPrfId" value="<%= prf.id %>" />
+          <div class="mb-3">
+            <label class="form-label fw-medium">Applicant Name</label>
+            <input type="text" id="applicantName" required placeholder="Full name" class="form-control" />
+          </div>
+          <div class="mb-3">
+            <label class="form-label fw-medium">Sourced From</label>
+            <select id="applicantSource" required class="form-select">
+              <option value="">-- Select --</option>
+              <option value="WALK IN">WALK IN</option>
+              <option value="PESO CDO">PESO CDO</option>
+              <option value="REFERRAL">REFERRAL</option>
+              <option value="ONLINE POSTING">ONLINE POSTING</option>
+              <option value="AGENCY">AGENCY</option>
+            </select>
+          </div>
+          <div class="mb-3">
+            <label class="form-label fw-medium">Recruitment Status</label>
+            <input type="text" id="applicantStatus" required list="statusSuggestions" placeholder="e.g. HIRED, PROCESSING DOCUMENTS, BACK OUT, ..." class="form-control" />
+            <datalist id="statusSuggestions">
+              <option value="HIRED"><option value="RE-HIRED"><option value="PROCESSING DOCUMENTS"><option value="PROCESSING DOCS"><option value="WAITING FOR JOB OFFER APPROVAL"><option value="WAITING FOR ON BOARD"><option value="FOR TRADETEST"><option value="FOR TRADETEST/PROCESSING DOCS"><option value="ON GOING PROCESS OF DOCS"><option value="BACK OUT"><option value="BACK OUT AFTER INTERVIEW"><option value="CANNOT BE REACH"><option value="DIDNT ANSWER CALL/DIDNT REPLY TEXT">
+            </datalist>
+          </div>
+          <div class="mb-3">
+            <label class="form-label fw-medium">Remarks</label>
+            <textarea id="applicantRemarks" rows="2" placeholder="Optional notes" class="form-control"></textarea>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+          <button type="submit" class="btn btn-success"><i class="bi bi-check-lg"></i> Save Applicant</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+<script>
+  const API = '/prf/api';
+  const PRF_ID = <%= prf.id %>;
+
+  function $(id) { return document.getElementById(id); }
+
+  function showToast(msg, type) {
+    type = type || 'success';
+    const colors = { success: 'bg-success', error: 'bg-danger', info: 'bg-primary' };
+    const el = document.createElement('div');
+    el.className = 'toast align-items-center text-white border-0 ' + colors[type] + ' show';
+    el.role = 'alert';
+    el.innerHTML = '<div class="d-flex"><div class="toast-body">' + msg + '</div><button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button></div>';
+    const container = document.getElementById('toastContainer') || (function() {
+      const c = document.createElement('div');
+      c.id = 'toastContainer';
+      c.className = 'toast-container position-fixed top-0 end-0 p-3';
+      c.style.zIndex = '9999';
+      document.body.appendChild(c);
+      return c;
+    })();
+    container.appendChild(el);
+    setTimeout(function() {
+      el.classList.remove('show');
+      setTimeout(function() { el.remove(); }, 300);
+    }, 3000);
+  }
+
+  async function apiFetch(url, opts) {
+    opts = opts || {};
+    const res = await fetch(API + url, {
+      headers: { 'Content-Type': 'application/json', ...opts.headers },
+      ...opts,
+    });
+    if (!res.ok) {
+      const body = await res.json().catch(function() { return { detail: res.statusText }; });
+      throw new Error(body.detail || 'HTTP ' + res.status);
+    }
+    if (res.status === 204) return null;
+    return res.json();
+  }
+
+  function openAddApplicantModal() {
+    $('applicantModalTitle').textContent = 'Add Applicant';
+    $('applicantForm').reset();
+    $('applicantId').value = '';
+    var modal = new bootstrap.Modal($('applicantModal'));
+    modal.show();
+  }
+
+  async function saveApplicant(e) {
+    e.preventDefault();
+    var applicantId = $('applicantId').value;
+    var payload = {
+      prf_request_id: PRF_ID,
+      applicant_name: $('applicantName').value.trim().toUpperCase(),
+      sourced_from: $('applicantSource').value,
+      recruitment_status: $('applicantStatus').value,
+      remarks: $('applicantRemarks').value.trim()
+    };
+    try {
+      if (applicantId) {
+        await apiFetch('/applicants/' + applicantId, { method: 'PATCH', body: JSON.stringify(payload) });
+        showToast('Applicant updated');
+      } else {
+        await apiFetch('/applicants', { method: 'POST', body: JSON.stringify(payload) });
+        showToast('Applicant added');
+      }
+      var modal = bootstrap.Modal.getInstance($('applicantModal'));
+      if (modal) modal.hide();
+      setTimeout(function() { window.location.reload(); }, 500);
+    } catch (e) { showToast(e.message, 'error'); }
+  }
+
+  async function editApplicant(applicantId) {
+    try {
+      var app = await apiFetch('/applicants?prf_id=' + PRF_ID);
+      var applicant = null;
+      for (var i = 0; i < app.length; i++) {
+        if (app[i].id === applicantId) { applicant = app[i]; break; }
+      }
+      if (!applicant) throw new Error('Applicant not found');
+      $('applicantModalTitle').textContent = 'Edit Applicant';
+      $('applicantId').value = applicant.id;
+      $('applicantName').value = applicant.applicant_name;
+      $('applicantSource').value = applicant.sourced_from;
+      $('applicantStatus').value = applicant.recruitment_status;
+      $('applicantRemarks').value = applicant.remarks || '';
+      var modal = new bootstrap.Modal($('applicantModal'));
+      modal.show();
+    } catch (e) { showToast(e.message, 'error'); }
+  }
+
+  async function deleteApplicant(applicantId) {
+    if (!confirm('Delete this applicant?')) return;
+    try {
+      await apiFetch('/applicants/' + applicantId, { method: 'DELETE' });
+      showToast('Applicant deleted');
+      setTimeout(function() { window.location.reload(); }, 500);
+    } catch (e) { showToast(e.message, 'error'); }
+  }
+
+  document.title = 'PRF - <%= prf.prf_no %>';
+</script>

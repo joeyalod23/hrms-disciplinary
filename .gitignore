@@ -1,0 +1,22 @@
+node_modules/
+db/*.db
+db/*.db-shm
+db/*.db-wal
+uploads/
+*.log
+.env
+.env.*
+logs/
+backups/
+stdout.txt
+stderr.txt
+cookies.txt
+*.bat
+DTR Summary.xls
+eng.traineddata
+BY2Y212660153_attlog.dat
+scripts/.edge-profile
+public/uploads/vault/
+public/uploads/leave_docs/
+deploy/HRMS-Package.zip
+data/

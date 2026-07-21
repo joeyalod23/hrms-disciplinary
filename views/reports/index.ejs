@@ -1,0 +1,274 @@
+<div class="container-fluid px-4 py-4">
+<div class="d-flex justify-content-between align-items-center mb-4">
+<div>
+<h4 class="fw-bold mb-1"><i class="bi bi-graph-up"></i> Reports & Analytics</h4>
+<p class="text-muted mb-0">
+<% if (typeof userBranch !== 'undefined' && userBranch) { %>
+<%= userBranch.name %>
+<% } else if (typeof isCorporate !== 'undefined' && isCorporate) { %>
+Corporate View <% if (selectedBranchId) { %> — Filtered by selected branch<% } %>
+<% } %>
+</p>
+</div>
+<div class="d-flex gap-2 align-items-center">
+<% if (typeof isCorporate !== 'undefined' && isCorporate && typeof branches !== 'undefined') { %>
+<form method="get" action="/reports" class="d-flex align-items-center gap-2">
+<select name="branch_id" class="form-select form-select-sm" style="width:auto" onchange="this.form.submit()">
+<option value="">All Branches (Consolidated)</option>
+<% branches.forEach(b => { %>
+<option value="<%= b.id %>" <%= selectedBranchId == b.id ? 'selected' : '' %>><%= b.code %> — <%= b.name %></option>
+<% }) %>
+</select>
+</form>
+<% } %>
+<a href="/reports/export?type=all<%= selectedBranchId ? '&branch_id=' + selectedBranchId : '' %>" class="btn btn-success btn-sm"><i class="bi bi-download"></i> Export CSV</a>
+</div>
+</div>
+
+<div class="row g-3 mb-4">
+<div class="col-md-3">
+<div class="card border-0 shadow-sm stat-card bg-primary text-white">
+<div class="card-body">
+<h6>Total Cases</h6>
+<h2 class="mb-0"><%= totalCases %></h2>
+</div>
+</div>
+</div>
+<div class="col-md-3">
+<div class="card border-0 shadow-sm stat-card bg-info text-white">
+<div class="card-body">
+<h6>Total Employees</h6>
+<h2 class="mb-0"><%= totalEmployees %></h2>
+</div>
+</div>
+</div>
+<div class="col-md-3">
+<div class="card border-0 shadow-sm stat-card bg-success text-white">
+<div class="card-body">
+<h6>Active Employees</h6>
+<h2 class="mb-0"><%= activeEmployees %></h2>
+</div>
+</div>
+</div>
+<div class="col-md-3">
+<div class="card border-0 shadow-sm stat-card bg-warning text-white">
+<div class="card-body">
+<h6>Avg Resolution</h6>
+<h2 class="mb-0"><%= avgResolutionDays && avgResolutionDays.avg_days ? Math.round(avgResolutionDays.avg_days) : 'N/A' %> days</h2>
+</div>
+</div>
+</div>
+</div>
+
+<div class="row g-3 mb-4">
+<div class="col-md-3">
+<div class="card border-0 shadow-sm">
+<div class="card-body text-center">
+<h6 class="text-muted">Active Contracts</h6>
+<h3 class="fw-bold mb-0"><%= activeContracts %></h3>
+</div>
+</div>
+</div>
+<div class="col-md-3">
+<div class="card border-0 shadow-sm">
+<div class="card-body text-center">
+<h6 class="text-muted">Present Today</h6>
+<h3 class="fw-bold mb-0"><%= todayPresent %></h3>
+</div>
+</div>
+</div>
+<div class="col-md-3">
+<div class="card border-0 shadow-sm">
+<div class="card-body text-center">
+<h6 class="text-muted">Bunkhouse Occupancy</h6>
+<h3 class="fw-bold mb-0"><%= bunkhouseOcc %>/<%= bunkhouseTotal %></h3>
+</div>
+</div>
+</div>
+<div class="col-md-3">
+<div class="card border-0 shadow-sm">
+<div class="card-body text-center">
+<h6 class="text-muted">Active ATDs</h6>
+<h3 class="fw-bold mb-0"><%= openAtds %></h3>
+</div>
+</div>
+</div>
+</div>
+
+<div class="row g-3 mb-4">
+<div class="col-md-3">
+<div class="card border-0 shadow-sm">
+<div class="card-body text-center">
+<h6 class="text-muted">Total Weight Score</h6>
+<h3 class="fw-bold mb-0 text-danger"><%= totalWeight || 0 %></h3>
+</div>
+</div>
+</div>
+<div class="col-md-3">
+<div class="card border-0 shadow-sm">
+<div class="card-body text-center">
+<h6 class="text-muted">Active NTEs</h6>
+<h3 class="fw-bold mb-0"><%= nteStats?.total || 0 %></h3>
+</div>
+</div>
+</div>
+<div class="col-md-3">
+<div class="card border-0 shadow-sm">
+<div class="card-body text-center">
+<h6 class="text-muted">Investigations</h6>
+<h3 class="fw-bold mb-0"><%= investigationStats?.total || 0 %></h3>
+</div>
+</div>
+</div>
+<div class="col-md-3">
+<div class="card border-0 shadow-sm">
+<div class="card-body text-center">
+<h6 class="text-muted">CDAF Records</h6>
+<h3 class="fw-bold mb-0"><%= cdafStats?.total || 0 %></h3>
+</div>
+</div>
+</div>
+</div>
+
+<div class="row g-3 mb-4">
+<div class="col-md-6">
+<div class="card border-0 shadow-sm">
+<div class="card-header bg-white py-3"><h6 class="mb-0 fw-bold"><i class="bi bi-bar-chart me-2"></i>Cases by Department</h6></div>
+<div class="card-body"><canvas id="deptChart" height="250"></canvas></div>
+</div>
+</div>
+<div class="col-md-6">
+<div class="card border-0 shadow-sm">
+<div class="card-header bg-white py-3"><h6 class="mb-0 fw-bold"><i class="bi bi-line me-2"></i>Monthly Trends</h6></div>
+<div class="card-body"><canvas id="trendChart" height="250"></canvas></div>
+</div>
+</div>
+</div>
+
+<div class="row g-3 mb-4">
+<div class="col-md-4">
+<div class="card border-0 shadow-sm">
+<div class="card-header bg-white py-3"><h6 class="mb-0 fw-bold"><i class="bi bi-pie-chart me-2"></i>Cases by Status</h6></div>
+<div class="card-body"><canvas id="statusChart" height="220"></canvas></div>
+</div>
+</div>
+<div class="col-md-4">
+<div class="card border-0 shadow-sm">
+<div class="card-header bg-white py-3"><h6 class="mb-0 fw-bold"><i class="bi bi-exclamation-triangle me-2"></i>Cases by Severity</h6></div>
+<div class="card-body"><canvas id="severityChart" height="220"></canvas></div>
+</div>
+</div>
+<div class="col-md-4">
+<div class="card border-0 shadow-sm">
+<div class="card-header bg-white py-3"><h6 class="mb-0 fw-bold"><i class="bi bi-tag me-2"></i>Top Offenses</h6></div>
+<div class="card-body p-0">
+<table class="table table-hover mb-0">
+<thead class="table-light"><tr><th class="py-2">Offense</th><th class="text-end py-2">Count</th></tr></thead>
+<tbody>
+<% topOffenses.forEach(o => { %>
+<tr><td class="py-1"><%= o.name %></td><td class="text-end py-1"><%= o.count %></td></tr>
+<% }) %>
+<% if (topOffenses.length === 0) { %>
+<tr><td colspan="2" class="text-center text-muted py-3">No data</td></tr>
+<% } %>
+</tbody>
+</table>
+</div>
+</div>
+</div>
+</div>
+
+<div class="row g-3 mb-4">
+<div class="col-md-6">
+<div class="card border-0 shadow-sm">
+<div class="card-header bg-white py-3"><h6 class="mb-0 fw-bold"><i class="bi bi-bar-chart me-2"></i>Cases by COD Category (A-E)</h6></div>
+<div class="card-body"><canvas id="codGroupChart" height="250"></canvas></div>
+</div>
+</div>
+<div class="col-md-6">
+<div class="card border-0 shadow-sm">
+<div class="card-header bg-white py-3"><h6 class="mb-0 fw-bold"><i class="bi bi-person-exclamation me-2"></i>Repeat Offenders</h6></div>
+<div class="card-body p-0">
+<table class="table table-hover mb-0">
+<thead class="table-light"><tr><th class="py-2">Employee</th><th class="py-2">Department</th><th class="text-end py-2">Cases</th><th class="text-end py-2">Weight</th></tr></thead>
+<tbody>
+<% repeatOffenders.forEach(r => { %>
+<tr>
+<td class="py-1"><%= r.full_name %><br><small class="text-muted"><%= r.employee_id %></small></td>
+<td class="py-1"><%= r.department || '-' %></td>
+<td class="text-end py-1"><strong><%= r.case_count %></strong></td>
+<td class="text-end py-1"><span class="badge bg-<%= r.total_weight >= 10 ? 'danger' : r.total_weight >= 5 ? 'warning' : 'info' %>"><%= r.total_weight || 0 %></span></td>
+</tr>
+<% }) %>
+<% if (repeatOffenders.length === 0) { %>
+<tr><td colspan="4" class="text-center text-muted py-3">No repeat offenders</td></tr>
+<% } %>
+</tbody>
+</table>
+</div>
+</div>
+</div>
+</div>
+
+<div class="row g-3 mb-4">
+<div class="col-md-4">
+<div class="card border-0 shadow-sm">
+<div class="card-header bg-white py-3"><h6 class="mb-0 fw-bold"><i class="bi bi-file-earmark-text me-2"></i>NTE Summary</h6></div>
+<div class="card-body">
+<div class="d-flex justify-content-between mb-2"><span class="text-muted">Total NTEs</span><strong><%= nteStats?.total || 0 %></strong></div>
+<div class="d-flex justify-content-between mb-2"><span class="text-muted">Draft</span><span class="badge bg-secondary"><%= nteStats?.draft || 0 %></span></div>
+<div class="d-flex justify-content-between mb-2"><span class="text-muted">Issued/Served</span><span class="badge bg-primary"><%= nteStats?.issued || 0 %></span></div>
+<div class="d-flex justify-content-between"><span class="text-muted">Replied</span><span class="badge bg-success"><%= nteStats?.replied || 0 %></span></div>
+</div>
+</div>
+</div>
+<div class="col-md-4">
+<div class="card border-0 shadow-sm">
+<div class="card-header bg-white py-3"><h6 class="mb-0 fw-bold"><i class="bi bi-search me-2"></i>Investigation Summary</h6></div>
+<div class="card-body">
+<div class="d-flex justify-content-between mb-2"><span class="text-muted">Total Reports</span><strong><%= investigationStats?.total || 0 %></strong></div>
+<div class="d-flex justify-content-between mb-2"><span class="text-muted">Draft</span><span class="badge bg-secondary"><%= investigationStats?.draft || 0 %></span></div>
+<div class="d-flex justify-content-between mb-2"><span class="text-muted">Submitted</span><span class="badge bg-primary"><%= investigationStats?.submitted || 0 %></span></div>
+<div class="d-flex justify-content-between"><span class="text-muted">Final</span><span class="badge bg-success"><%= investigationStats?.final || 0 %></span></div>
+</div>
+</div>
+</div>
+<div class="col-md-4">
+<div class="card border-0 shadow-sm">
+<div class="card-header bg-white py-3"><h6 class="mb-0 fw-bold"><i class="bi bi-clipboard-check me-2"></i>CDAF Summary</h6></div>
+<div class="card-body">
+<div class="d-flex justify-content-between mb-2"><span class="text-muted">Total CDAFs</span><strong><%= cdafStats?.total || 0 %></strong></div>
+<div class="d-flex justify-content-between mb-2"><span class="text-muted">Verbal Reprimand</span><span class="badge bg-info"><%= cdafStats?.verbal || 0 %></span></div>
+<div class="d-flex justify-content-between mb-2"><span class="text-muted">Written Reprimand</span><span class="badge bg-warning"><%= cdafStats?.written || 0 %></span></div>
+<div class="d-flex justify-content-between"><span class="text-muted">Open</span><span class="badge bg-danger"><%= cdafStats?.open || 0 %></span></div>
+</div>
+</div>
+</div>
+</div>
+
+<% if (typeof isCorporate !== 'undefined' && isCorporate && typeof branches !== 'undefined') { %>
+<div class="card border-0 shadow-sm mb-4">
+<div class="card-header bg-white py-3"><h6 class="mb-0 fw-bold"><i class="bi bi-building me-2"></i>Branch Overview</h6></div>
+<div class="card-body p-0">
+<table class="table table-hover mb-0">
+<thead class="table-light">
+<tr><th class="py-2">Branch</th><th class="text-end py-2">Employees</th><th class="text-end py-2">Active</th><th class="text-end py-2">Cases</th><th class="text-end py-2">Active ATDs</th></tr>
+</thead>
+<tbody>
+<% branches.forEach(b => { %>
+<tr>
+<td class="py-2"><span class="badge bg-secondary me-1"><%= b.code %></span> <%= b.name %></td>
+<td class="text-end py-2"><%= b.employee_count || 0 %></td>
+<td class="text-end py-2"><%= b.active_employee_count || 0 %></td>
+<td class="text-end py-2"><%= b.case_count || 0 %></td>
+<td class="text-end py-2"><%= b.atd_count || 0 %></td>
+</tr>
+<% }) %>
+</tbody>
+</table>
+</div>
+</div>
+<% } %>
+</div>
+
+<% scripts = '<script>const deptLabels = ' + JSON.stringify(casesByDepartment.map(d => d.department)) + '; const deptCounts = ' + JSON.stringify(casesByDepartment.map(d => d.count)) + '; const trendLabels = ' + JSON.stringify(monthlyTrends.map(d => d.month)) + '; const trendCounts = ' + JSON.stringify(monthlyTrends.map(d => d.count)) + '; const statusLabels = ' + JSON.stringify(casesByStatus.map(d => d.status)) + '; const statusCounts = ' + JSON.stringify(casesByStatus.map(d => d.count)) + '; const severityLabels = ' + JSON.stringify(casesBySeverity.map(d => d.severity)) + '; const severityCounts = ' + JSON.stringify(casesBySeverity.map(d => d.count)) + '; const codGroupLabels = ' + JSON.stringify(casesByCODGroup.map(d => "Group " + d.group_code)) + '; const codGroupCounts = ' + JSON.stringify(casesByCODGroup.map(d => d.count)) + '; const codGroupWeights = ' + JSON.stringify(casesByCODGroup.map(d => d.total_weight || 0)) + ';</script><script src="/js/reports.js"></script>' %>

@@ -1,0 +1,107 @@
+<div class="container-fluid px-4 py-4">
+  <div class="d-flex justify-content-between align-items-center mb-4">
+    <h4 class="fw-bold"><i class="bi bi-search"></i> Investigation Report</h4>
+    <div>
+      <small class="text-muted me-3">F-HRD-035</small>
+      <a href="/cases/view/<%= report.case_id %>" class="btn btn-outline-info"><i class="bi bi-folder2-open"></i> View Case</a>
+      <a href="/investigations" class="btn btn-outline-secondary"><i class="bi bi-arrow-left"></i> Back</a>
+    </div>
+  </div>
+  <div class="row g-3">
+    <div class="col-md-8">
+      <div class="card border-0 shadow-sm mb-3">
+        <div class="card-header bg-white py-3 d-flex justify-content-between align-items-center">
+          <div>
+            <h6 class="mb-0 fw-bold"><%= report.report_number %></h6>
+            <small class="text-muted">Case: <%= report.case_number %></small>
+          </div>
+          <span class="badge bg-<%= report.status === 'Final' ? 'dark' : report.status === 'Reviewed' ? 'info' : report.status === 'Submitted' ? 'primary' : 'secondary' %> fs-6"><%= report.status %></span>
+        </div>
+        <div class="card-body">
+          <div class="row g-3">
+            <div class="col-md-4">
+              <p class="mb-1 text-muted small">Employee</p>
+              <p class="fw-medium"><%= report.employee_name %></p>
+            </div>
+            <div class="col-md-4">
+              <p class="mb-1 text-muted small">Investigator</p>
+              <p class="fw-medium"><%= report.investigator %></p>
+            </div>
+            <div class="col-md-4">
+              <p class="mb-1 text-muted small">Investigation Date</p>
+              <p class="fw-medium"><%= new Date(report.investigation_date).toLocaleDateString() %></p>
+            </div>
+          </div>
+          <hr>
+          <div class="mb-3">
+            <p class="mb-1 text-muted small">Verdict</p>
+            <% if (report.is_guilty === 1) { %>
+              <span class="badge bg-danger fs-6">Guilty</span>
+            <% } else if (report.is_guilty === 0) { %>
+              <span class="badge bg-success fs-6">Not Guilty</span>
+            <% } else { %>
+              <span class="badge bg-secondary fs-6">Pending</span>
+            <% } %>
+          </div>
+          <hr>
+          <h6 class="fw-bold text-primary">Findings</h6>
+          <p><%= report.findings %></p>
+          <hr>
+          <h6 class="fw-bold text-primary">Conclusion</h6>
+          <p><%= report.conclusion %></p>
+          <% if (report.recommended_action) { %>
+            <hr>
+            <h6 class="fw-bold text-primary">Recommended Action</h6>
+            <p><%= report.recommended_action %></p>
+          <% } %>
+          <hr>
+          <div class="row g-3">
+            <div class="col-md-4">
+              <p class="mb-1 text-muted small">Submitted By</p>
+              <p class="fw-medium"><%= report.submitted_by_name || 'N/A' %></p>
+            </div>
+            <div class="col-md-4">
+              <p class="mb-1 text-muted small">Submitted Date</p>
+              <p class="fw-medium"><%= report.submitted_date ? new Date(report.submitted_date).toLocaleDateString() : 'N/A' %></p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="col-md-4">
+      <% if (report.status === 'Submitted') { %>
+        <div class="card border-0 shadow-sm mb-3">
+          <div class="card-header bg-white py-3"><h6 class="mb-0 fw-bold text-info"><i class="bi bi-check2-circle"></i> Review Report</h6></div>
+          <div class="card-body">
+            <form method="POST" action="/investigations/review/<%= report.id %>">
+              <div class="mb-2">
+                <label class="form-label small">Reviewed By</label>
+                <input type="text" name="reviewed_by" class="form-control form-control-sm" placeholder="Reviewer name">
+              </div>
+              <button type="submit" class="btn btn-info btn-sm w-100"><i class="bi bi-check-lg"></i> Mark as Reviewed</button>
+            </form>
+          </div>
+        </div>
+      <% } %>
+      <% if (report.status === 'Submitted' || report.status === 'Reviewed') { %>
+        <div class="card border-0 shadow-sm mb-3">
+          <div class="card-header bg-white py-3"><h6 class="mb-0 fw-bold text-dark"><i class="bi bi-lock"></i> Finalize Report</h6></div>
+          <div class="card-body">
+            <p class="small text-muted">Finalizing locks the report. Attach to case for verdict processing.</p>
+            <form method="POST" action="/investigations/finalize/<%= report.id %>">
+              <button type="submit" class="btn btn-dark btn-sm w-100"><i class="bi bi-check2-all"></i> Finalize Report</button>
+            </form>
+          </div>
+        </div>
+      <% } %>
+      <% if (report.status === 'Draft') { %>
+        <div class="card border-0 shadow-sm mb-3">
+          <div class="card-header bg-white py-3"><h6 class="mb-0 fw-bold text-warning"><i class="bi bi-pencil"></i> Edit Draft</h6></div>
+          <div class="card-body">
+            <a href="/investigations/edit/<%= report.id %>" class="btn btn-warning btn-sm w-100"><i class="bi bi-pencil"></i> Edit Report</a>
+          </div>
+        </div>
+      <% } %>
+    </div>
+  </div>
+</div>

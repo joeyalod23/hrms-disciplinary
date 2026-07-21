@@ -1,0 +1,143 @@
+<div class="container-fluid px-4 py-4">
+  <div class="d-flex justify-content-between align-items-center mb-4">
+    <h4 class="fw-bold"><i class="bi bi-upload"></i> Import Biometric (.dat)</h4>
+    <a href="/attendance" class="btn btn-outline-secondary"><i class="bi bi-arrow-left"></i> Back to Attendance</a>
+  </div>
+
+  <% if (typeof error !== 'undefined' && error) { %>
+    <div class="alert alert-danger"><%= error %></div>
+  <% } %>
+
+  <% if (result) { %>
+    <div class="card border-0 shadow-sm mb-4">
+      <div class="card-body text-center py-4">
+        <i class="bi bi-check-circle-fill text-success" style="font-size: 3rem;"></i>
+        <h5 class="mt-2">Import Complete</h5>
+        <div class="row justify-content-center mt-3">
+          <div class="col-auto">
+            <div class="border rounded p-3 text-center">
+              <span class="d-block fs-3 text-success"><%= result.inserted %></span>
+              <small class="text-muted">Inserted</small>
+            </div>
+          </div>
+          <div class="col-auto">
+            <div class="border rounded p-3 text-center">
+              <span class="d-block fs-3 text-warning"><%= result.updated %></span>
+              <small class="text-muted">Updated</small>
+            </div>
+          </div>
+          <div class="col-auto">
+            <div class="border rounded p-3 text-center">
+              <span class="d-block fs-3 text-secondary"><%= result.skipped %></span>
+              <small class="text-muted">Skipped</small>
+            </div>
+          </div>
+          <div class="col-auto">
+            <div class="border rounded p-3 text-center">
+              <span class="d-block fs-3 text-danger"><%= result.errors.length %></span>
+              <small class="text-muted">Errors</small>
+            </div>
+          </div>
+        </div>
+        <% if (result.errors.length > 0) { %>
+          <div class="mt-3 text-start">
+            <h6>Errors:</h6>
+            <ul class="list-unstyled">
+              <% result.errors.slice(0, 20).forEach(e => { %>
+                <li class="text-danger small">ID <%= e.id %> on <%= e.date %> — <%= e.reason %></li>
+              <% }) %>
+            </ul>
+          </div>
+        <% } %>
+        <a href="/attendance/upload" class="btn btn-primary mt-3"><i class="bi bi-upload"></i> Import Another</a>
+        <a href="/attendance" class="btn btn-outline-secondary mt-3"><i class="bi bi-clock"></i> View Attendance</a>
+      </div>
+    </div>
+  <% } else if (parsed) { %>
+    <div class="card border-0 shadow-sm mb-4">
+      <div class="card-header bg-white py-3">
+        <h5 class="mb-0"><i class="bi bi-file-text"></i> Preview — <%= parsed.total %> record(s) found</h5>
+      </div>
+      <div class="card-body">
+        <div class="row mb-3">
+          <div class="col-md-3">
+            <div class="border rounded p-3 text-center">
+              <span class="d-block fs-4 text-primary"><%= parsed.success %></span>
+              <small class="text-muted">Parsable</small>
+            </div>
+          </div>
+          <div class="col-md-3">
+            <div class="border rounded p-3 text-center">
+              <span class="d-block fs-4 text-danger"><%= parsed.errors.length %></span>
+              <small class="text-muted">Errors</small>
+            </div>
+          </div>
+        </div>
+
+        <% if (parsed.previewRows && parsed.previewRows.length > 0) { %>
+          <div class="table-responsive">
+            <table class="table table-sm table-bordered">
+              <thead class="table-dark">
+                <tr>
+                  <th>Bio ID</th>
+                  <th>Date</th>
+                  <th>Time</th>
+                  <th>Status</th>
+                  <th>Matched Employee</th>
+                </tr>
+              </thead>
+              <tbody>
+                <% parsed.previewRows.forEach(r => { %>
+                  <tr class="<%= r.matched_employee === 'NOT FOUND' ? 'table-danger' : '' %>">
+                    <td><%= r.id %></td>
+                    <td><%= r.date %></td>
+                    <td><%= r.time || '—' %></td>
+                    <td><%= r.status || '—' %></td>
+                    <td><%= r.matched_employee %></td>
+                  </tr>
+                <% }) %>
+              </tbody>
+            </table>
+            <% if (parsed.parsed_rows.length > 100) { %>
+              <p class="text-muted small">Showing first 100 of <%= parsed.parsed_rows.length %> records</p>
+            <% } %>
+          </div>
+        <% } %>
+
+        <form method="POST" action="/attendance/upload/import">
+          <% if (typeof dataFile !== 'undefined' && dataFile) { %>
+            <input type="hidden" name="data_file" value="<%= dataFile %>">
+          <% } %>
+          <div class="d-flex gap-2">
+            <button type="submit" class="btn btn-success" <%= parsed.success === 0 ? 'disabled' : '' %>>
+              <i class="bi bi-check-lg"></i> Import <%= parsed.success %> Records
+            </button>
+            <a href="/attendance/upload" class="btn btn-outline-secondary">Cancel</a>
+          </div>
+        </form>
+      </div>
+    </div>
+  <% } else { %>
+    <div class="card border-0 shadow-sm">
+      <div class="card-body">
+        <div class="text-center mb-4">
+          <i class="bi bi-clock-history" style="font-size: 4rem; color: #0d3b66;"></i>
+          <p class="text-muted mt-2">Upload a .dat file exported from your biometric machine.</p>
+          <p class="text-muted small">The system will match the Biometric ID to the Employee ID and auto-populate attendance.</p>
+        </div>
+        <form method="POST" action="/attendance/upload" enctype="multipart/form-data" class="row g-3 justify-content-center">
+          <div class="col-md-6">
+            <label class="form-label">Select .dat file</label>
+            <input type="file" name="datfile" class="form-control" accept=".dat,.txt,.csv" required>
+          </div>
+          <div class="col-md-2 d-flex align-items-end">
+            <button type="submit" class="btn btn-primary w-100">
+              <i class="bi bi-upload"></i> Upload & Preview
+            </button>
+          </div>
+          <input type="hidden" name="action" value="preview">
+        </form>
+      </div>
+    </div>
+  <% } %>
+</div>

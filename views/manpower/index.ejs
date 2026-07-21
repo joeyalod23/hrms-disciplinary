@@ -1,0 +1,325 @@
+<div class="container-fluid px-4 py-4">
+  <div class="d-flex justify-content-between align-items-center mb-4">
+    <h4 class="fw-bold"><i class="bi bi-diagram-3"></i> Manpower Report</h4>
+    <div>
+      <button class="btn btn-sm btn-primary" data-bs-toggle="modal" data-bs-target="#addModal"><i class="bi bi-plus-lg"></i> Add Entry</button>
+      <button class="btn btn-sm btn-outline-secondary" data-bs-toggle="modal" data-bs-target="#periodModal"><i class="bi bi-calendar-plus"></i> Add Period</button>
+      <a href="/manpower/teams" class="btn btn-sm btn-outline-primary"><i class="bi bi-people"></i> Teams</a>
+    </div>
+  </div>
+
+  <!-- Add Entry Modal -->
+  <div class="modal fade" id="addModal" tabindex="-1">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <form method="POST" action="/manpower/loading/add">
+          <div class="modal-header"><h5 class="modal-title">Add Manpower Entry</h5><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div>
+          <div class="modal-body">
+            <div class="mb-2">
+              <label class="form-label small">Category</label>
+              <select name="category" class="form-select form-select-sm">
+                <option value="Direct">Direct</option>
+                <option value="Indirect">Indirect</option>
+              </select>
+            </div>
+            <div class="mb-2">
+              <label class="form-label small">Trade / Category Name</label>
+              <input type="text" name="trade" class="form-control form-control-sm" required>
+            </div>
+            <div class="form-check mb-2">
+              <input class="form-check-input" type="checkbox" name="is_subcon" id="isSubcon" value="1">
+              <label class="form-check-label small" for="isSubcon">Subcontractor</label>
+            </div>
+            <div class="row g-2">
+              <div class="col-6">
+                <label class="form-label small">Required BOW</label>
+                <input type="number" name="required_bow" class="form-control form-control-sm">
+              </div>
+              <div class="col-6">
+                <label class="form-label small">Balance</label>
+                <input type="number" name="balance" class="form-control form-control-sm">
+              </div>
+            </div>
+          </div>
+          <div class="modal-footer"><button type="submit" class="btn btn-primary btn-sm">Save</button></div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- Add Period Modal -->
+  <div class="modal fade" id="periodModal" tabindex="-1">
+    <div class="modal-dialog modal-sm">
+      <div class="modal-content">
+        <form method="POST" action="/manpower/period/add">
+          <div class="modal-header"><h5 class="modal-title">Add Period</h5><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div>
+          <div class="modal-body">
+            <div class="mb-2">
+              <label class="form-label small">Period Label</label>
+              <input type="text" name="label" class="form-control" placeholder="e.g. 2026 Q2" required>
+            </div>
+          </div>
+          <div class="modal-footer"><button type="submit" class="btn btn-primary btn-sm">Add</button></div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- Edit Entry Modal -->
+  <div class="modal fade" id="editModal" tabindex="-1">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <form method="POST" action="">
+          <div class="modal-header"><h5 class="modal-title">Edit Manpower Entry</h5><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div>
+          <div class="modal-body">
+            <div class="mb-2">
+              <label class="form-label small">Category</label>
+              <select name="category" id="editCategory" class="form-select form-select-sm">
+                <option value="Direct">Direct</option>
+                <option value="Indirect">Indirect</option>
+              </select>
+            </div>
+            <div class="mb-2">
+              <label class="form-label small">Trade / Category Name</label>
+              <input type="text" name="trade" id="editTrade" class="form-control form-control-sm" required>
+            </div>
+            <div class="form-check mb-2">
+              <input class="form-check-input" type="checkbox" name="is_subcon" id="editSubcon" value="1">
+              <label class="form-check-label small" for="editSubcon">Subcontractor</label>
+            </div>
+            <div class="row g-2">
+              <div class="col-6">
+                <label class="form-label small">Required BOW</label>
+                <input type="number" name="required_bow" id="editBOW" class="form-control form-control-sm">
+              </div>
+              <div class="col-6">
+                <label class="form-label small">Balance</label>
+                <input type="number" name="balance" id="editBalance" class="form-control form-control-sm">
+              </div>
+            </div>
+            <hr>
+            <h6 class="fw-bold small">Period Values</h6>
+            <div id="editPeriodValues"></div>
+          </div>
+          <div class="modal-footer"><button type="submit" class="btn btn-primary btn-sm">Update</button></div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <div class="card border-0 shadow-sm mb-3">
+    <div class="card-header bg-white py-3 d-flex justify-content-between align-items-center flex-wrap">
+      <h6 class="mb-0 fw-bold"><i class="bi bi-table"></i> MANPOWER REPORT — VAIL RESIDENCES</h6>
+      <div class="d-flex flex-wrap gap-1">
+        <% if (typeof periods !== 'undefined' && periods && periods.length > 0) { %>
+          <% periods.forEach(function(p) { %>
+            <span class="badge bg-light text-dark border"><%= p.label %> <a href="/manpower/period/delete/<%= p.id %>" class="text-danger ms-1 text-decoration-none" onclick="return confirm('Delete period?')">&times;</a></span>
+          <% }) %>
+        <% } %>
+      </div>
+    </div>
+    <div class="card-body p-0">
+      <div class="table-responsive">
+        <table class="table table-bordered mb-0" style="font-size:0.82rem">
+          <thead class="table-secondary">
+            <tr class="text-center">
+              <th class="text-start" style="white-space:nowrap">Manpower Category</th>
+              <% if (typeof periods !== 'undefined' && periods) { periods.forEach(function(p) { %><th style="white-space:nowrap"><%= p.label %></th><% }); } %>
+              <th style="white-space:nowrap">Req BOW</th>
+              <th style="white-space:nowrap">Balance</th>
+              <th style="white-space:nowrap">Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr class="table-primary fw-bold"><td>Direct Manpower</td><% if (typeof periods !== 'undefined' && periods) { periods.forEach(function(p) { %><td></td><% }); } %><td></td><td></td><td></td></tr>
+
+            <% if ((!directItems || directItems.length === 0) && (!subconItems || subconItems.length === 0)) { %>
+              <tr><td colspan="<%= 4 + (typeof periods !== 'undefined' && periods ? periods.length : 0) %>" class="text-center text-muted py-3">No entries</td></tr>
+            <% } %>
+
+            <% if (typeof directItems !== 'undefined' && directItems) { directItems.forEach(function(l) { %>
+            <tr>
+              <td><%= l.trade %></td>
+              <% if (typeof periods !== 'undefined' && periods) { periods.forEach(function(p) { %>
+                <td class="text-center"><%= (l.vals && l.vals[p.id]) ? l.vals[p.id] : 0 %></td>
+              <% }); } %>
+              <td class="text-center"><%= l.required_bow || 0 %></td>
+              <td class="text-center"><span class="<%= (l.balance||0) < 0 ? 'text-danger fw-bold' : '' %>"><%= l.balance || 0 %></span></td>
+              <td class="text-center">
+                <button class="btn btn-sm btn-outline-info py-0 px-1" title="People" onclick="openPeople('<%= l.trade %>')"><i class="bi bi-people"></i></button>
+                <button class="btn btn-sm btn-outline-secondary py-0 px-1" title="Edit" onclick='openEdit(<%= l.id %>,"<%= l.trade.replace(/"/g,"&quot;") %>","<%= l.category %>",<%= l.is_subcon %>,<%= l.required_bow||0 %>,<%= l.balance||0 %>)' data-vals='<%= JSON.stringify(l.vals||{}) %>'><i class="bi bi-pencil"></i></button>
+                <a href="/manpower/loading/delete/<%= l.id %>" class="btn btn-sm btn-outline-danger py-0 px-1" onclick="return confirm('Delete?')"><i class="bi bi-trash"></i></a>
+              </td>
+            </tr>
+            <% }); } %>
+
+            <% if (typeof subconItems !== 'undefined' && subconItems && subconItems.length > 0) { %>
+            <tr class="table-warning"><td colspan="<%= 4 + (typeof periods !== 'undefined' && periods ? periods.length : 0) %>" class="fw-bold small">SUBCONTRACTORS</td></tr>
+            <% subconItems.forEach(function(l) { %>
+            <tr>
+              <td><%= l.trade %></td>
+              <% if (typeof periods !== 'undefined' && periods) { periods.forEach(function(p) { %>
+                <td class="text-center"><%= (l.vals && l.vals[p.id]) ? l.vals[p.id] : 0 %></td>
+              <% }); } %>
+              <td class="text-center"><%= l.required_bow || 0 %></td>
+              <td class="text-center"><span class="<%= (l.balance||0) < 0 ? 'text-danger fw-bold' : '' %>"><%= l.balance || 0 %></span></td>
+              <td class="text-center">
+                <button class="btn btn-sm btn-outline-info py-0 px-1" title="People" onclick="openPeople('<%= l.trade %>')"><i class="bi bi-people"></i></button>
+                <button class="btn btn-sm btn-outline-secondary py-0 px-1" title="Edit" onclick='openEdit(<%= l.id %>,"<%= l.trade.replace(/"/g,"&quot;") %>","<%= l.category %>",<%= l.is_subcon %>,<%= l.required_bow||0 %>,<%= l.balance||0 %>)' data-vals='<%= JSON.stringify(l.vals||{}) %>'><i class="bi bi-pencil"></i></button>
+                <a href="/manpower/loading/delete/<%= l.id %>" class="btn btn-sm btn-outline-danger py-0 px-1" onclick="return confirm('Delete?')"><i class="bi bi-trash"></i></a>
+              </td>
+            </tr>
+            <% }); } %>
+
+            <tr class="table-secondary fw-bold">
+              <td>Total Direct</td>
+              <% if (typeof periods !== 'undefined' && periods && typeof tDirect !== 'undefined') { periods.forEach(function(p) { %><td class="text-center"><%= tDirect[p.id] || 0 %></td><% }); } %>
+              <td class="text-center"><%= tDirect ? tDirect.required : 0 %></td>
+              <td class="text-center"><%= tDirect ? tDirect.balance : 0 %></td>
+              <td></td>
+            </tr>
+
+            <tr><td colspan="<%= 4 + (typeof periods !== 'undefined' && periods ? periods.length : 0) %>" style="height:10px"></td></tr>
+
+            <tr class="table-primary fw-bold"><td>Indirect Manpower</td><% if (typeof periods !== 'undefined' && periods) { periods.forEach(function(p) { %><td></td><% }); } %><td></td><td></td><td></td></tr>
+
+            <% if (!indirectItems || indirectItems.length === 0) { %>
+              <tr><td colspan="<%= 4 + (typeof periods !== 'undefined' && periods ? periods.length : 0) %>" class="text-center text-muted py-3">No indirect entries</td></tr>
+            <% } else { indirectItems.forEach(function(l) { %>
+            <tr>
+              <td><%= l.trade %></td>
+              <% if (typeof periods !== 'undefined' && periods) { periods.forEach(function(p) { %>
+                <td class="text-center"><%= (l.vals && l.vals[p.id]) ? l.vals[p.id] : 0 %></td>
+              <% }); } %>
+              <td class="text-center"><%= l.required_bow || 0 %></td>
+              <td class="text-center"><span class="<%= (l.balance||0) < 0 ? 'text-danger fw-bold' : '' %>"><%= l.balance || 0 %></span></td>
+              <td class="text-center">
+                <button class="btn btn-sm btn-outline-info py-0 px-1" title="People" onclick="openPeople('<%= l.trade %>')"><i class="bi bi-people"></i></button>
+                <button class="btn btn-sm btn-outline-secondary py-0 px-1" title="Edit" onclick='openEdit(<%= l.id %>,"<%= l.trade.replace(/"/g,"&quot;") %>","<%= l.category %>",<%= l.is_subcon %>,<%= l.required_bow||0 %>,<%= l.balance||0 %>)' data-vals='<%= JSON.stringify(l.vals||{}) %>'><i class="bi bi-pencil"></i></button>
+                <a href="/manpower/loading/delete/<%= l.id %>" class="btn btn-sm btn-outline-danger py-0 px-1" onclick="return confirm('Delete?')"><i class="bi bi-trash"></i></a>
+              </td>
+            </tr>
+            <% }); } %>
+
+            <tr class="table-secondary fw-bold">
+              <td>Total Indirect</td>
+              <% if (typeof periods !== 'undefined' && periods && typeof tIndirect !== 'undefined') { periods.forEach(function(p) { %><td class="text-center"><%= tIndirect[p.id] || 0 %></td><% }); } %>
+              <td class="text-center"><%= tIndirect ? tIndirect.required : 0 %></td>
+              <td class="text-center"><%= tIndirect ? tIndirect.balance : 0 %></td>
+              <td></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- Summary row -->
+  <div class="row g-3">
+    <div class="col-lg-5">
+      <div class="card border-0 shadow-sm mb-3">
+        <div class="card-header bg-white py-2"><h6 class="mb-0 fw-bold"><i class="bi bi-file-text"></i> Total Required Summary</h6></div>
+        <div class="card-body">
+          <table class="table table-sm table-borderless mb-0">
+            <tr><td class="fw-bold">ADMIN</td><td class="text-end fw-bold fs-5"><%= typeof adminReq !== 'undefined' ? adminReq : 0 %></td></tr>
+            <tr><td class="fw-bold">SUBCON</td><td class="text-end fw-bold fs-5"><%= typeof subconReq !== 'undefined' ? subconReq : 0 %></td></tr>
+            <tr><td colspan="2"><hr class="my-1"></td></tr>
+            <tr><td>Active Admin</td><td class="text-end"><%= typeof activeAdmin !== 'undefined' ? activeAdmin : 0 %></td></tr>
+            <tr><td>Balance</td><td class="text-end"><%= (typeof adminReq !== 'undefined' && typeof activeAdmin !== 'undefined') ? (adminReq - activeAdmin) : 0 %></td></tr>
+            <tr><td colspan="2"><hr class="my-1"></td></tr>
+            <tr><td>Active Subcon</td><td class="text-end"><%= typeof activeSubcon !== 'undefined' ? activeSubcon : 0 %></td></tr>
+            <tr><td>Balance</td><td class="text-end"><%= typeof subconBal !== 'undefined' ? subconBal : 0 %></td></tr>
+          </table>
+        </div>
+      </div>
+    </div>
+    <div class="col-lg-7">
+      <div class="card border-0 shadow-sm mb-3">
+        <div class="card-header bg-white py-2"><h6 class="mb-0 fw-bold"><i class="bi bi-bar-chart"></i> Active Employees by Trade</h6></div>
+        <div class="card-body"><canvas id="tradeChart" height="200"></canvas></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Current Assignments -->
+  <div class="card border-0 shadow-sm mb-3">
+    <div class="card-header bg-white py-3 d-flex justify-content-between align-items-center" role="button" data-bs-toggle="collapse" data-bs-target="#assignmentsSection" style="cursor:pointer">
+      <h6 class="mb-0 fw-bold"><i class="bi bi-people"></i> Current Assignments <span class="badge bg-secondary"><%= typeof totalAssignments !== 'undefined' ? totalAssignments : 0 %></span></h6>
+      <i class="bi bi-chevron-down"></i>
+    </div>
+    <div class="collapse" id="assignmentsSection">
+      <div class="card-body p-0">
+        <div class="table-responsive">
+          <table class="table table-hover mb-0">
+            <thead class="table-light"><tr><th>Employee</th><th>ID</th><th>Trade</th><th>Team</th><th>Project Site</th></tr></thead>
+            <tbody>
+              <% if (!assignments || assignments.length === 0) { %>
+                <tr><td colspan="5" class="text-center text-muted py-3">No assignments</td></tr>
+              <% } else { assignments.forEach(function(a) { %>
+                <tr><td><%= a.full_name %></td><td><%= a.employee_id %></td><td><%= a.trade || '--' %></td><td><%= a.team_name || '--' %></td><td><%= a.project_site %></td></tr>
+              <% }); } %>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- People Modal -->
+<div class="modal fade" id="peopleModal" tabindex="-1">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header"><h5 class="modal-title"><i class="bi bi-people-fill"></i> <span id="peopleTitle"></span></h5><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div>
+      <div class="modal-body">
+        <form method="POST" action="/manpower/trade/add-emp" class="row g-2 mb-3">
+          <input type="hidden" name="trade" id="peopleTrade">
+          <div class="col-8">
+            <select name="employee_id" class="form-select form-select-sm" required>
+              <option value="">-- Select --</option>
+              <% if (typeof allEmps !== 'undefined' && allEmps) { allEmps.forEach(function(e) { %>
+                <option value="<%= e.id %>"><%= e.full_name %> (<%= e.employee_id %>)</option>
+              <% }); } %>
+            </select>
+          </div>
+          <div class="col-4"><button type="submit" class="btn btn-success btn-sm w-100"><i class="bi bi-plus"></i> Add</button></div>
+        </form>
+        <table class="table table-sm table-hover mb-0">
+          <thead class="table-light"><tr><th>ID</th><th>Name</th><th>Position</th><th style="width:50px"></th></tr></thead>
+          <tbody id="peopleList"></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+
+<% scripts = '<script>' +
+'var empData = ' + JSON.stringify(typeof tradeEmps !== 'undefined' ? tradeEmps : {}) + ';' +
+'var periodList = ' + JSON.stringify(typeof periods !== 'undefined' ? periods : []) + ';' +
+'function openPeople(trade){' +
+  'document.getElementById(\'peopleTitle\').textContent=trade;' +
+  'document.getElementById(\'peopleTrade\').value=trade;' +
+  'var list=document.getElementById(\'peopleList\');' +
+  'var emps=empData[trade]||[];' +
+  'if(emps.length===0){list.innerHTML=\'<tr><td colspan="4" class="text-center text-muted py-2">No employees</td></tr>\';}' +
+  'else{var h=\'\';emps.forEach(function(e){h+=\'<tr><td>\'+e.employee_id+\'</td><td>\'+e.full_name+\'</td><td>\'+(e.position||\'--\')+\'</td><td><a href="/manpower/trade/remove-emp/\'+e.id+\'" class="btn btn-sm btn-outline-danger py-0 px-1" onclick="return confirm(\\\'Remove?\\\')"><i class="bi bi-x"></i></a></td></tr>\';});list.innerHTML=h;}' +
+  'new bootstrap.Modal(document.getElementById(\'peopleModal\')).show();' +
+'}' +
+'function openEdit(id,trade,category,subcon,bow,bal){' +
+  'document.getElementById(\'editTrade\').value=trade;' +
+  'document.getElementById(\'editCategory\').value=category;' +
+  'document.getElementById(\'editSubcon\').checked=!!subcon;' +
+  'document.getElementById(\'editBOW\').value=bow;' +
+  'document.getElementById(\'editBalance\').value=bal;' +
+  'var btn=event.target.closest(\'button\');' +
+  'var vals=JSON.parse(btn.getAttribute(\'data-vals\')||\'{}\');' +
+  'var c=document.getElementById(\'editPeriodValues\');c.innerHTML=\'\';' +
+  'periodList.forEach(function(p){' +
+    'var d=document.createElement(\'div\');d.className=\'row mb-1 align-items-center\';' +
+    'd.innerHTML=\'<div class="col-4"><small>\'+p.label+\'</small></div><div class="col-4"><input type="number" name="val_\'+p.id+\'" class="form-control form-control-sm" value="\'+((vals&&vals[p.id])?vals[p.id]:0)+\'"></div>\';' +
+    'c.appendChild(d);' +
+  '});' +
+  'document.querySelector(\'#editModal form\').action=\'/manpower/loading/update/\'+id;' +
+  'new bootstrap.Modal(document.getElementById(\'editModal\')).show();' +
+'}' +
+'</script>' %>

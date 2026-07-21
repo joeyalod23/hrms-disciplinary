@@ -1,0 +1,392 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>HRMS — System Proposal</title>
+<style>
+  @page { margin: 2cm; }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { font-family: 'Segoe UI', 'Helvetica Neue', Arial, sans-serif; font-size: 11pt; line-height: 1.6; color: #1a1a1a; padding: 2cm; max-width: 210mm; margin: 0 auto; }
+  h1 { font-size: 22pt; color: #0d3b66; border-bottom: 3px solid #0d3b66; padding-bottom: 8px; margin-top: 0; margin-bottom: 20px; }
+  h2 { font-size: 16pt; color: #0d3b66; margin-top: 30px; margin-bottom: 10px; padding-bottom: 4px; border-bottom: 1px solid #ccc; }
+  h3 { font-size: 13pt; color: #1a5276; margin-top: 20px; margin-bottom: 8px; }
+  h4 { font-size: 11pt; color: #333; margin-top: 15px; margin-bottom: 6px; }
+  p { margin-bottom: 10px; text-align: justify; }
+  ul, ol { margin-bottom: 10px; padding-left: 25px; }
+  li { margin-bottom: 4px; }
+  table { width: 100%; border-collapse: collapse; margin: 15px 0; font-size: 10pt; }
+  th { background: #0d3b66; color: #fff; padding: 8px 10px; text-align: left; font-weight: 600; }
+  td { padding: 6px 10px; border-bottom: 1px solid #ddd; }
+  tr:nth-child(even) td { background: #f7f9fb; }
+  .cover { text-align: center; padding: 60px 0 40px; page-break-after: always; }
+  .cover h1 { font-size: 28pt; border: none; margin-bottom: 5px; }
+  .cover .subtitle { font-size: 16pt; color: #555; margin-bottom: 40px; }
+  .cover .meta { font-size: 11pt; color: #777; line-height: 2; }
+  .cover .logo { font-size: 36pt; font-weight: 800; color: #0d3b66; margin-bottom: 20px; letter-spacing: 2px; }
+  .section { page-break-inside: avoid; }
+  .badge { display: inline-block; background: #e8f0fe; color: #0d3b66; padding: 2px 8px; border-radius: 3px; font-size: 9pt; margin: 1px; }
+  .badge-green { background: #e6f4ea; color: #1e7e34; }
+  .badge-orange { background: #fef7e0; color: #e37400; }
+  .toc { margin: 30px 0; }
+  .toc li { margin-bottom: 6px; }
+  .toc a { color: #0d3b66; text-decoration: none; }
+  .page-break { page-break-before: always; }
+  footer { text-align: center; color: #999; font-size: 9pt; margin-top: 40px; border-top: 1px solid #ddd; padding-top: 10px; }
+  .highlight-box { background: #f0f7ff; border-left: 4px solid #0d3b66; padding: 12px 16px; margin: 15px 0; border-radius: 0 4px 4px 0; }
+  @media print { body { padding: 0; } }
+</style>
+</head>
+<body>
+
+<!-- Cover Page -->
+<div class="cover">
+  <div class="logo">HRMS</div>
+  <h1>Integrated Site Human Resource<br>Management System</h1>
+  <p class="subtitle">System Proposal &amp; Technical Documentation</p>
+  <div class="meta">
+    <p><strong>Project:</strong> L.V. Ledesma Construction, Inc.</p>
+    <p><strong>Version:</strong> 2.0.0</p>
+    <p><strong>Date:</strong> June 2026</p>
+    <p><strong>Prepared by:</strong> Systems Development Team</p>
+  </div>
+</div>
+
+<!-- Table of Contents -->
+<div class="page-break"></div>
+<h2>Table of Contents</h2>
+<ol class="toc">
+  <li><a href="#executive">Executive Summary</a></li>
+  <li><a href="#overview">System Overview</a></li>
+  <li><a href="#modules">Modules &amp; Features</a></li>
+  <li><a href="#architecture">Technical Architecture</a></li>
+  <li><a href="#workflows">Key Workflows</a></li>
+  <li><a href="#benefits">Business Benefits</a></li>
+  <li><a href="#enhancements">Proposed Enhancements</a></li>
+  <li><a href="#conclusion">Conclusion</a></li>
+</ol>
+
+<!-- 1. Executive Summary -->
+<div class="page-break section" id="executive">
+<h2>1. Executive Summary</h2>
+<p>HRMS is a comprehensive web-based Human Resource Management System purpose-built for L.V. Ledesma Construction, Inc. It consolidates all site-level HR operations into a single, centralized digital platform — from employee master data and attendance tracking to disciplinary due process, recruitment, contract management, bunkhouse administration, and field compliance monitoring.</p>
+<p>The system replaces fragmented manual processes (paper forms, spreadsheets, standalone files) with an integrated digital workflow that ensures data consistency, real-time visibility, regulatory compliance, and auditability. Built using modern open-source technologies (Node.js, Express, SQLite), it runs on-premises with minimal infrastructure requirements.</p>
+<div class="highlight-box">
+<strong>Key Metrics:</strong> 31 database tables | 21 functional modules | 52 user interfaces | 3 user roles (Admin, HRD, User) | JWT-authenticated | Full audit trail
+</div>
+</div>
+
+<!-- 2. System Overview -->
+<div class="page-break section" id="overview">
+<h2>2. System Overview</h2>
+
+<h3>2.1 Purpose &amp; Scope</h3>
+<p>HRMS addresses the complete lifecycle of construction-site HR management:</p>
+<ul>
+  <li><strong>Employee Lifecycle:</strong> Onboarding → Assignment → Attendance → Performance → Offboarding</li>
+  <li><strong>Disciplinary Due Process:</strong> Incident Report → Notice of Violation → Notice to Explain → Hearing → Verdict → Closure</li>
+  <li><strong>Recruitment Pipeline:</strong> PRF Request → Applicant Sourcing → Screening → Hiring → Deployment</li>
+  <li><strong>Site Operations:</strong> Field Inspections → Bunkhouse Management → Salary Deductions (ATD) → Manpower Loading</li>
+  <li><strong>Compliance &amp; Audit:</strong> Compliance Calendar → Document Vault → Full Audit Trail → COD-Based Offense Classification</li>
+</ul>
+
+<h3>2.2 User Roles</h3>
+<table>
+  <tr><th>Role</th><th>Access Level</th><th>Capabilities</th></tr>
+  <tr><td><strong>Admin</strong></td><td>Full</td><td>All modules, user management, audit logs, compliance, configuration</td></tr>
+  <tr><td><strong>HRD</strong></td><td>High</td><td>All operational modules, compliance management, audit viewing</td></tr>
+  <tr><td><strong>User</strong></td><td>Standard</td><td>Day-to-day operations, data entry, views, reports</td></tr>
+</table>
+
+<h3>2.3 Default Credentials</h3>
+<table>
+  <tr><th>Username</th><th>Password</th><th>Role</th></tr>
+  <tr><td>admin</td><td>admin123</td><td>Administrator</td></tr>
+  <tr><td>hrd</td><td>hrd123</td><td>HR Department</td></tr>
+  <tr><td>auditor</td><td>audit123</td><td>Auditor / Read-Only</td></tr>
+</table>
+</div>
+
+<!-- 3. Modules -->
+<div class="page-break section" id="modules">
+<h2>3. Modules &amp; Features</h2>
+
+<h3>3.1 Dashboard</h3>
+<p>The central hub displays real-time KPIs: total employees, today's attendance, open disciplinary cases, expiring contracts, bunkhouse occupancy, and active ATDs. Interactive charts (monthly case trends, cases by status, severity breakdown) provide at-a-glance analytics. Recent activity, upcoming hearings, and compliance tasks keep management informed.</p>
+
+<h3>3.2 Employee Management</h3>
+<p>Complete employee master registry with 30+ fields covering personal information, employment details, government IDs (SSS, Pag-IBIG, PhilHealth), compensation rates, emergency contacts, and status tracking (Active/Inactive/Resigned/Terminated). Features include search, pagination, status filtering, and linked views showing associated cases, contracts, attendance, and ATDs.</p>
+
+<h3>3.3 Attendance Tracking</h3>
+<p>Daily attendance recording with AM/PM time-in/out, overtime tracking, and status classification (Present, Late, Half Day, Absent, Sick Leave, Filed Leave, Emergency Leave, AWOL, Holiday). Automated monthly summaries calculate working days, tardiness, and leave totals per employee. CSV export for payroll processing.</p>
+
+<h3>3.4 Incident Reports</h3>
+<p>Digital version of F-HRD-023 form with structured fields for alleged violator details, incident location/type, witnesses, narrative description, and signatory routing. Integrated OCR engine (Tesseract.js) extracts data from scanned document images. Status workflow from Open through Resolved to Closed. Auto-calculates 5-day NTE deadline.</p>
+
+<h3>3.5 Notice of Violation (NoV)</h3>
+<p>Two-way workflow between construction site and Main Office: Draft → Submitted to Main Office → Reviewed → Returned to Site. Links directly to incident reports and updates their status. Captures findings, recommended actions, and main office feedback.</p>
+
+<h3>3.6 Notice to Explain (NTE)</h3>
+<p>Complete NTE lifecycle automation: Draft → Issue/Serve → Employee Reply → Resolution → Closure. Features include employee lookup, COD-code selection, preparer/checker/approver signatories, preventive suspension tracking, auto-calculated explanation deadlines, and refusal-to-sign recording with witness. Print-friendly view for physical serving.</p>
+
+<h3>3.7 Disciplinary Cases</h3>
+<p>Central case management with auto-generated case numbers (DC-YYYY-NNNN). Supports document uploads (incident reports, NTEs, verdicts, etc.), hearing scheduling, internal case notes, and full verdict tracking (decided by, served by, received by). Status workflow: Open → Under Investigation → For Hearing → Resolved/Dismissed/Appealed.</p>
+
+<h3>3.8 Hearing Management</h3>
+<p>Schedule and track disciplinary hearings linked to cases. Statuses: Scheduled → Ongoing → Completed → Cancelled. Auto-updates parent case status to "For Hearing."</p>
+
+<h3>3.9 Contract Management</h3>
+<p>Employment contract lifecycle with daily/monthly rates, project site assignment, contract file attachments, and extension management. "Expiring within 30 days" alerts, CSV export, and auto-population of employee rate fields upon contract creation.</p>
+
+<h3>3.10 Recruitment &amp; PRF</h3>
+<p>Personnel Requisition Form (PRF) management with department, position, trade, and skilled/non-skilled counts. Applicant tracking through full pipeline: For Screening → For Interview → For Medical → For Orientation → Hired/Rejected. Auto-creates employee record when applicant is hired. Pre-employment checklist management.</p>
+
+<h3>3.11 PRF Monitor</h3>
+<p>Interactive real-time dashboard showing hiring status by project and PRF line item. Tracks total requested, hired, pending, and remaining slots with color-coded indicators. Full CRUD REST API for PRFs and applicants.</p>
+
+<h3>3.12 Manpower Loading</h3>
+<p>Trade-based manpower targets with actual hiring vs. balance tracking. Team management with leadman/foreman assignments. Employee-to-project-site assignment with automatic previous assignment deactivation.</p>
+
+<h3>3.13 Field Checking</h3>
+<p>Digital field inspection reports with date/time, inspector details, and dynamic violation entries. Photo evidence upload. Status workflow: Open → Addressed → Closed.</p>
+
+<h3>3.14 Bunkhouse Management</h3>
+<p>Room inventory with capacity and occupancy tracking. Occupant management with rental rate (default Php 100) and frequency (Weekly/Monthly/One Time). Auto-checkout and occupancy counting.</p>
+
+<h3>3.15 Authorization to Deduct (ATD)</h3>
+<p>Salary deduction management with auto-numbering (ATD-YYYY-NNNN), itemized deduction entries, weekly deduction calculation, and status tracking (Active → Completed → Cancelled). CSV export.</p>
+
+<h3>3.16 Compliance Calendar</h3>
+<p>Task management for compliance deadlines with priority levels and status tracking. Auto-generates tasks for expiring contracts and pending evaluations. Role-restricted to Admin/HRD for task management.</p>
+
+<h3>3.17 Document Vault</h3>
+<p>Centralized document repository categorized by type (Policy, Form, Report, Contract, Other). Supports revisions, descriptions, and file uploads up to 30MB.</p>
+
+<h3>3.18 Reports &amp; Analytics</h3>
+<p>Comprehensive reports with Chart.js visualizations: monthly case trends, severity breakdown, top offenses, repeat offenders, departmental analysis. CSV export for all major modules including combined full export.</p>
+
+<h3>3.19 Audit Log</h3>
+<p>Complete activity trail capturing user, action, module, reference ID, details, and IP address for every significant operation. 90-day auto-cleanup. Role-restricted to Admin/HRD.</p>
+</div>
+
+<!-- 4. Technical Architecture -->
+<div class="page-break section" id="architecture">
+<h2>4. Technical Architecture</h2>
+
+<h3>4.1 Technology Stack</h3>
+<table>
+  <tr><th>Layer</th><th>Technology</th><th>Purpose</th></tr>
+  <tr><td>Runtime</td><td>Node.js</td><td>Server-side JavaScript execution</td></tr>
+  <tr><td>Web Framework</td><td>Express 5.2.1</td><td>HTTP routing, middleware, request handling</td></tr>
+  <tr><td>Template Engine</td><td>EJS 6.0.1</td><td>Server-side HTML rendering with layouts</td></tr>
+  <tr><td>Database</td><td>SQLite (better-sqlite3)</td><td>Embedded zero-configuration relational database</td></tr>
+  <tr><td>Authentication</td><td>JWT + bcryptjs</td><td>Token-based auth with hashed passwords</td></tr>
+  <tr><td>Frontend</td><td>Bootstrap 5 + Chart.js</td><td>Responsive UI and interactive charts</td></tr>
+  <tr><td>OCR</td><td>Tesseract.js</td><td>Scanned document text extraction</td></tr>
+  <tr><td>File Uploads</td><td>Multer</td><td>Multipart form file handling</td></tr>
+  <tr><td>Spreadsheets</td><td>ExcelJS</td><td>Excel read/write for data export</td></tr>
+</table>
+
+<h3>4.2 Architecture Diagram</h3>
+<pre style="background:#f5f5f5;padding:15px;border-radius:6px;font-size:9pt;line-height:1.4;overflow-x:auto;">
+┌─────────────────────────────────────────────────────────┐
+│                     Client Browser                        │
+│  (Bootstrap 5 UI · Chart.js · EJS Templates · Tailwind)  │
+└──────────┬──────────────────────────────────┬────────────┘
+           │ HTTP Requests                    │ Static Assets
+           ▼                                  ▼
+┌──────────────────────┐          ┌──────────────────────┐
+│   Express Router     │          │   /public directory  │
+│   (21 route files)   │          │   CSS · JS · Images  │
+└──────────┬───────────┘          └──────────────────────┘
+           │
+           ▼
+┌─────────────────────────────────────────────────────────┐
+│                  Middleware Stack                         │
+│  cookie-parser · express.json · verifyToken · audit.js   │
+└──────────┬──────────────────────────────────┬────────────┘
+           │                                  │
+           ▼                                  ▼
+┌──────────────────────┐          ┌──────────────────────┐
+│   SQLite Database    │          │   File System         │
+│   31 Tables · WAL    │          │   Upload directories  │
+│   HRMS.db       │          │   (case_docs, vault,  │
+└──────────────────────┘          │    fieldchecks, ocr)  │
+                                  └──────────────────────┘
+</pre>
+
+<h3>4.3 Security</h3>
+<ul>
+  <li><strong>Authentication:</strong> JWT tokens stored in httpOnly cookies (24-hour expiry)</li>
+  <li><strong>Password Security:</strong> bcryptjs hashing with salt rounds</li>
+  <li><strong>Access Control:</strong> Role-based middleware (requireRole) for sensitive operations</li>
+  <li><strong>Audit Trail:</strong> Every modification logged with user, timestamp, and IP address</li>
+  <li><strong>File Validation:</strong> MIME type and size limits on all uploads</li>
+  <li><strong>SQL Injection:</strong> Parameterized queries via better-sqlite3 prepared statements</li>
+</ul>
+
+<h3>4.4 Database Schema</h3>
+<p>The system uses 31 tables organized into functional groups:</p>
+<table>
+  <tr><th>Group</th><th>Tables</th></tr>
+  <tr><td>Core HR</td><td>users, employees, teams, employee_team_assignments</td></tr>
+  <tr><td>Attendance</td><td>attendance_records, attendance_monthly_summary</td></tr>
+  <tr><td>Disciplinary</td><td>offense_categories, incident_reports, disciplinary_cases, case_documents, case_notes, hearings, notice_of_violations, nte_cases</td></tr>
+  <tr><td>Recruitment</td><td>recruitment_requests, recruitment_applicants, pre_employment_checklist, projects, prf_requests, prf_applicants</td></tr>
+  <tr><td>Contracts</td><td>contracts, contract_extensions</td></tr>
+  <tr><td>Site Operations</td><td>field_checks, field_check_violations, bunkhouse_rooms, bunkhouse_occupants, atd_records, atd_items</td></tr>
+  <tr><td>Manpower</td><td>manpower_loading, manpower_assignments</td></tr>
+  <tr><td>Evaluations</td><td>evaluation_records</td></tr>
+  <tr><td>Compliance &amp; Audit</td><td>compliance_calendar, audit_logs, document_vault</td></tr>
+</table>
+</div>
+
+<!-- 5. Key Workflows -->
+<div class="page-break section" id="workflows">
+<h2>5. Key Workflows</h2>
+
+<h3>5.1 Disciplinary Due Process</h3>
+<ol>
+  <li><strong>Incident Occurs</strong> → Supervisor files Incident Report (F-HRD-023) digitally or via scanned document (OCR)</li>
+  <li><strong>Notice of Violation</strong> → Site creates NoV, submits to Main Office for review, receives feedback</li>
+  <li><strong>Notice to Explain (NTE)</strong> → Issued to employee with 5-day explanation period; employee signs (or refuses with witness)</li>
+  <li><strong>Employee Explanation</strong> → Employee submits written explanation; case proceeds to evaluation</li>
+  <li><strong>Disciplinary Case</strong> → Case opened, assigned offense category (COD-coded), investigated</li>
+  <li><strong>Hearing</strong> → Scheduled and conducted with proper documentation</li>
+  <li><strong>Verdict</strong> → Decision rendered, penalty imposed, closure documented</li>
+</ol>
+
+<h3>5.2 Recruitment Pipeline</h3>
+<ol>
+  <li><strong>PRF Request</strong> → Department requests personnel via PRF with position, trade, and count</li>
+  <li><strong>Sourcing</strong> → Applicants sourced via Walk-in, PESO, Referral, Online, or Agency</li>
+  <li><strong>Screening</strong> → For Screening → For Interview → For Medical → For Orientation</li>
+  <li><strong>Hiring</strong> → Status set to "Hired"; system auto-creates employee record</li>
+  <li><strong>Deployment</strong> → Employee assigned to project site and team via Manpower module</li>
+</ol>
+
+<h3>5.3 Employee Onboarding &amp; Lifecycle</h3>
+<ol>
+  <li><strong>Employee Record Created</strong> → Via recruitment hiring or direct employee form</li>
+  <li><strong>Contract Issued</strong> → Employment contract with rates, dates, and project site</li>
+  <li><strong>Team Assignment</strong> → Assigned to work team and project location</li>
+  <li><strong>Attendance Tracking</strong> → Daily time records with monthly summaries</li>
+  <li><strong>Performance Evaluation</strong> → Periodic evaluations (probationary, quarterly, annual)</li>
+  <li><strong>Contract Extension</strong> → End-date management with extension memos</li>
+  <li><strong>Separation</strong> → Resignation or termination with proper documentation</li>
+</ol>
+
+<h3>5.4 Field Compliance Inspection</h3>
+<ol>
+  <li><strong>Inspection Conducted</strong> → Field check performed at project site</li>
+  <li><strong>Report Filed</strong> → Digital report with inspector details and photo evidence</li>
+  <li><strong>Violations Logged</strong> → Each violation recorded with employee/designation details</li>
+  <li><strong>Action Taken</strong> → Violation addressed with corrective action documented</li>
+  <li><strong>Closure</strong> → Status updated to Closed upon resolution</li>
+</ol>
+</div>
+
+<!-- 6. Business Benefits -->
+<div class="page-break section" id="benefits">
+<h2>6. Business Benefits</h2>
+
+<h3>6.1 Operational Efficiency</h3>
+<ul>
+  <li><strong>Paperless Operations:</strong> Eliminates physical forms, reduces printing costs, and prevents document loss</li>
+  <li><strong>Automated Workflows:</strong> NTE deadlines, case numbering, attendance summaries, and contract expiry alerts are auto-calculated</li>
+  <li><strong>Centralized Data:</strong> Single source of truth for all HR data across all project sites</li>
+  <li><strong>Time Savings:</strong> OCR integration eliminates manual data entry from scanned forms</li>
+</ul>
+
+<h3>6.2 Compliance &amp; Governance</h3>
+<ul>
+  <li><strong>Due Process Assurance:</strong> Complete digital trail of the disciplinary process ensures labor code compliance</li>
+  <li><strong>COD-Based Classification:</strong> Standardized offense coding ensures consistent penalty application</li>
+  <li><strong>Audit Readiness:</strong> Full audit log captures every action with user, timestamp, and IP</li>
+  <li><strong>Document Retention:</strong> Centralized document vault with version tracking</li>
+</ul>
+
+<h3>6.3 Decision Support</h3>
+<ul>
+  <li><strong>Real-Time Dashboard:</strong> At-a-glance KPIs for management decision-making</li>
+  <li><strong>Analytics:</strong> Offense trends, repeat offender identification, severity analysis</li>
+  <li><strong>Recruitment Visibility:</strong> PRF Monitor shows real-time hiring status per project and trade</li>
+  <li><strong>Contract Alerts:</strong> 30-day advance notice of expiring contracts prevents lapses</li>
+</ul>
+
+<h3>6.4 Cost Savings</h3>
+<ul>
+  <li><strong>Zero Licensing Costs:</strong> Built entirely on open-source technologies</li>
+  <li><strong>Low Infrastructure:</strong> SQLite database requires no dedicated database server</li>
+  <li><strong>Reduced Manpower:</strong> Automated processes reduce administrative workload</li>
+  <li><strong>Offline Capable:</strong> Single-server deployment runs on standard Windows/Linux machines</li>
+</ul>
+</div>
+
+<!-- 7. Proposed Enhancements -->
+<div class="page-break section" id="enhancements">
+<h2>7. Proposed Enhancements</h2>
+<p>The following enhancements are recommended to further strengthen the system:</p>
+
+<h3>7.1 High Priority</h3>
+
+<h4>7.1.1 Email &amp; SMS Notifications</h4>
+<p>Integrate email (Nodemailer) and SMS (Twilio or similar) for automated alerts: NTE issuance notifications, hearing reminders, contract expiry warnings, and compliance task due dates. This ensures stakeholders never miss critical deadlines.</p>
+
+<h4>7.1.2 Biometrics Integration</h4>
+<p>Connect to biometric devices (fingerprint/face recognition) for automated attendance recording. This eliminates manual time-in/time-out entry and reduces attendance fraud.</p>
+
+<h4>7.1.3 Advanced Reporting Engine</h4>
+<p>Enhance the reports module with drill-down capabilities, date-range filters for all exports, and PDF generation (PDFKit) for formal report documents. Add DOLE-required report templates.</p>
+
+<h4>7.1.4 Employee Self-Service Portal</h4>
+<p>A dedicated employee-facing portal where workers can view their attendance records, contracts, payslips, leave balances, and NTE status. Reduces HR's administrative burden for routine inquiries.</p>
+
+<h3>7.2 Medium Priority</h3>
+
+<h4>7.2.1 Leave Management System</h4>
+<p>Dedicated leave module with leave balance tracking (vacation, sick, emergency), leave application workflow with supervisor approval, and automatic deduction from attendance records. Currently, leaves are entry-level statuses in attendance.</p>
+
+<h4>7.2.2 Payroll Integration</h4>
+<p>Generate payroll-ready data exports (attendance summaries, ATD deductions, contract rates) in formats compatible with popular Philippine payroll systems. Consider building a basic payroll computation module.</p>
+
+<h4>7.2.3 Mobile Application</h4>
+<p>Develop a mobile app (or PWA) for field supervisors to file incident reports, conduct field checks, and record attendance on-site using their smartphones. Optimize the existing responsive web interface for mobile use.</p>
+
+<h4>7.2.4 Dashboard Customization</h4>
+<p>Allow users to customize their dashboard layout, choose which KPIs to display, set thresholds for alerts, and save personal dashboard configurations.</p>
+
+<h3>7.3 Lower Priority / Future</h3>
+
+<h4>7.3.1 Multi-Branch Support</h4>
+<p>Extend the system to support multiple company branches/sites with data isolation while allowing consolidated corporate-level reporting.</p>
+
+<h4>7.3.2 Government Reporting</h4>
+<p>Generate DOLE-mandated reports (establishment report, accident report, termination report) and SSS/Pag-IBIG/PhilHealth remittance files in required formats.</p>
+
+<h4>7.3.3 Training &amp; Certification Tracking</h4>
+<p>Track employee training certificates, safety certifications (e.g., COSH, LCM), and license renewals with expiry alerts.</p>
+
+<h4>7.3.4 AI-Powered Analytics</h4>
+<p>Implement predictive analytics for identifying high-risk employees (based on offense patterns and attendance), recommending intervention measures, and forecasting manpower needs.</p>
+
+<h4>7.3.5 Two-Factor Authentication (2FA)</h4>
+<p>Add an extra security layer with OTP-based 2FA for sensitive operations and admin access.</p>
+
+<h4>7.3.6 Data Backup &amp; Recovery</h4>
+<p>Automated database backup scheduling with cloud storage integration (Google Drive, Dropbox) and one-click restore functionality.</p>
+</div>
+
+<!-- 8. Conclusion -->
+<div class="page-break section" id="conclusion">
+<h2>8. Conclusion</h2>
+<p>HRMS represents a mature, comprehensive HR management solution tailored specifically for construction site operations. Its integrated design ensures that employee data flows seamlessly across all HR functions — from recruitment through separation — while maintaining full auditability and regulatory compliance.</p>
+<p>The system's modular architecture allows for incremental enhancement without disrupting existing operations. The proposed enhancements outlined in Section 7 provide a clear roadmap for future development, prioritizing features that deliver the highest operational impact.</p>
+<p>With zero licensing costs, minimal infrastructure requirements, and a user-friendly web interface, HRMS delivers enterprise-grade HR management capabilities at a fraction of the cost of commercial alternatives.</p>
+</div>
+
+<footer>
+HRMS v2.0.0 &mdash; System Proposal &mdash; L.V. Ledesma Construction, Inc. &mdash; June 2026
+</footer>
+
+</body>
+</html>

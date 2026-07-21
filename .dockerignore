@@ -1,0 +1,22 @@
+node_modules
+db/*.db
+db/*.db-shm
+db/*.db-wal
+uploads/
+backups/
+logs/
+.env
+*.log
+stdout.txt
+stderr.txt
+cookies.txt
+*.bat
+.git
+.gitignore
+deploy/
+docs/
+scripts/
+DTR Summary.xls
+eng.traineddata
+BY2Y212660153_attlog.dat
+scripts/.edge-profile

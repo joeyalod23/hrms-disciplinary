@@ -1,0 +1,113 @@
+<div class="d-flex justify-content-between align-items-center mb-4">
+<div>
+<h3 class="fw-bold mb-1"><i class="bi bi-person-circle me-2"></i>Welcome, <%= emp.full_name %></h3>
+<p class="text-muted mb-0"><%= emp.position %> &middot; <%= emp.department %> &middot; <%= emp.project_site %></p>
+</div>
+</div>
+
+<div class="row g-3 mb-4">
+<div class="col-md-3">
+<div class="card bg-primary text-white"><div class="card-body text-center"><div class="stat-number"><%= attendance.filter(a => a.status === 'Present').length %></div><div class="stat-label">Present (30d)</div></div></div>
+</div>
+<div class="col-md-3">
+<div class="card bg-warning text-white"><div class="card-body text-center"><div class="stat-number"><%= contracts.filter(c => c.status === 'Active').length %></div><div class="stat-label">Active Contracts</div></div></div>
+</div>
+<div class="col-md-3">
+<div class="card bg-danger text-white"><div class="card-body text-center"><div class="stat-number"><%= cases.length %></div><div class="stat-label">Disciplinary Cases</div></div></div>
+</div>
+<div class="col-md-3">
+<div class="card bg-info text-white"><div class="card-body text-center"><div class="stat-number"><%= atds.length %></div><div class="stat-label">Active Deductions</div></div></div>
+</div>
+</div>
+
+<div class="row g-3 mb-4">
+<div class="col-md-6">
+<div class="card h-100">
+<div class="card-header"><h6 class="mb-0 fw-bold"><i class="bi bi-clock me-2"></i>Recent Attendance</h6></div>
+<div class="card-body p-0">
+<div class="table-responsive">
+<table class="table table-sm mb-0">
+<thead class="table-light"><tr><th class="py-2">Date</th><th class="py-2">AM In<br><small class="fw-normal">7:30-12:00</small></th><th class="py-2">AM Out<br><small class="fw-normal">7:30-12:00</small></th><th class="py-2">PM In<br><small class="fw-normal">1:00-4:30</small></th><th class="py-2">PM Out<br><small class="fw-normal">1:00-4:30</small></th><th class="py-2">Status</th></tr></thead>
+<tbody>
+<% if (attendance.length === 0) { %><tr><td colspan="6" class="text-center py-3 text-muted">No records</td></tr><% } %>
+<% attendance.forEach(a => { %>
+<tr><td class="py-1"><%= a.date %></td><td class="py-1"><%= a.am_in || '-' %></td><td class="py-1"><%= a.am_out || '-' %></td><td class="py-1"><%= a.pm_in || '-' %></td><td class="py-1"><%= a.pm_out || '-' %></td><td class="py-1"><span class="badge bg-<%= a.status === 'Present' ? 'success' : a.status === 'Late' ? 'warning' : a.status === 'Absent' ? 'danger' : 'secondary' %>"><%= a.status %></span></td></tr>
+<% }) %>
+</tbody>
+</table>
+</div>
+</div>
+</div>
+</div>
+<div class="col-md-6">
+<div class="card h-100">
+<div class="card-header"><h6 class="mb-0 fw-bold"><i class="bi bi-file-earmark-text me-2"></i>Contracts</h6></div>
+<div class="card-body p-0">
+<div class="table-responsive">
+<table class="table table-sm mb-0">
+<thead class="table-light"><tr><th class="py-2">Type</th><th class="py-2">Start</th><th class="py-2">End</th><th class="py-2">Status</th></tr></thead>
+<tbody>
+<% if (contracts.length === 0) { %><tr><td colspan="4" class="text-center py-3 text-muted">No contracts</td></tr><% } %>
+<% contracts.forEach(c => { %>
+<tr><td class="py-1"><%= c.contract_type %></td><td class="py-1"><%= c.start_date %></td><td class="py-1"><%= c.end_date %></td><td class="py-1"><span class="badge bg-<%= c.status === 'Active' ? 'success' : 'secondary' %>"><%= c.status %></span></td></tr>
+<% }) %>
+</tbody>
+</table>
+</div>
+</div>
+</div>
+</div>
+</div>
+
+<div class="row g-3">
+<div class="col-md-6">
+<div class="card h-100">
+<div class="card-header"><h6 class="mb-0 fw-bold"><i class="bi bi-folder2-open me-2"></i>Disciplinary Cases</h6></div>
+<div class="card-body p-0">
+<div class="table-responsive">
+<table class="table table-sm mb-0">
+<thead class="table-light"><tr><th class="py-2">Case #</th><th class="py-2">Offense</th><th class="py-2">Severity</th><th class="py-2">Status</th></tr></thead>
+<tbody>
+<% if (cases.length === 0) { %><tr><td colspan="4" class="text-center py-3 text-muted">No cases</td></tr><% } %>
+<% cases.forEach(c => { %>
+<tr><td class="py-1"><%= c.case_number %></td><td class="py-1"><%= c.offense_name || '-' %></td><td class="py-1"><span class="badge bg-<%= c.severity === 'Serious' ? 'danger' : c.severity === 'Less Serious' ? 'warning' : 'info' %>"><%= c.severity || '-' %></span></td><td class="py-1"><span class="badge bg-<%= c.status === 'Resolved' ? 'success' : 'primary' %>"><%= c.status %></span></td></tr>
+<% }) %>
+</tbody>
+</table>
+</div>
+</div>
+</div>
+</div>
+<div class="col-md-6">
+<div class="card h-100">
+<div class="card-header"><h6 class="mb-0 fw-bold"><i class="bi bi-card-list me-2"></i>Notice to Explain</h6></div>
+<div class="card-body p-0">
+<div class="table-responsive">
+<table class="table table-sm mb-0">
+<thead class="table-light"><tr><th class="py-2">Memo #</th><th class="py-2">Date</th><th class="py-2">Status</th></tr></thead>
+<tbody>
+<% if (ntes.length === 0) { %><tr><td colspan="3" class="text-center py-3 text-muted">No NTEs</td></tr><% } %>
+<% ntes.forEach(n => { %>
+<tr><td class="py-1"><%= n.memo_number %></td><td class="py-1"><%= n.date_issued || n.created_at %></td><td class="py-1"><span class="badge bg-<%= n.status === 'Issued' ? 'warning' : n.status === 'Resolved' ? 'success' : 'secondary' %>"><%= n.status %></span></td></tr>
+<% }) %>
+</tbody>
+</table>
+</div>
+</div>
+</div>
+</div>
+</div>
+
+<div class="row g-3 mt-3">
+<div class="col-12">
+<div class="card">
+<div class="card-header"><h6 class="mb-0 fw-bold"><i class="bi bi-wallet2 me-2"></i>Active Salary Deductions (ATD)</h6></div>
+<div class="card-body">
+<% if (atds.length === 0) { %><p class="text-muted text-center py-3 mb-0">No active deductions</p><% } else { %>
+<div class="table-responsive"><table class="table table-sm mb-0"><thead class="table-light"><tr><th>ATD #</th><th>Weekly Deduction</th><th>Total</th><th>Start</th><th>End</th></tr></thead><tbody>
+<% atds.forEach(a => { %><tr><td><%= a.atd_number %></td><td>₱<%= Number(a.weekly_deduction).toFixed(2) %></td><td>₱<%= Number(a.total_deduction).toFixed(2) %></td><td><%= a.start_date %></td><td><%= a.end_date %></td></tr><% }) %></tbody></table></div>
+<% } %>
+</div>
+</div>
+</div>
+</div>

@@ -1,0 +1,168 @@
+<div class="container-fluid px-4 py-4">
+  <div class="d-flex justify-content-between align-items-center mb-4">
+    <h4 class="fw-bold"><i class="bi bi-file-earmark-text"></i> Contract Monitoring</h4>
+    <div>
+      <a href="/contracts/export?<%= search ? 'search=' + search : '' %><%= status ? '&status=' + status : '' %><%= expiring ? '&expiring=1' : '' %>" class="btn btn-outline-success me-2"><i class="bi bi-download"></i> Export CSV</a>
+      <a href="/contracts/add" class="btn btn-primary"><i class="bi bi-plus-lg"></i> Add Contract</a>
+    </div>
+  </div>
+  <div class="row g-3 mb-4">
+    <div class="col-md-3">
+      <a href="/contracts" class="text-decoration-none">
+        <div class="card border-0 shadow-sm text-white <%= !status && !expiring ? 'bg-primary' : 'bg-primary bg-opacity-50' %>" style="cursor:pointer; transition: transform 0.15s;">
+          <div class="card-body">
+            <h6 class="card-title"><i class="bi bi-people"></i> Total Employees</h6>
+            <h2 class="mb-0"><%= totalEmployees %></h2>
+            <small class="opacity-75">Click to view all</small>
+          </div>
+        </div>
+      </a>
+    </div>
+    <div class="col-md-3">
+      <a href="/contracts?status=Active" class="text-decoration-none">
+        <div class="card border-0 shadow-sm text-white <%= status === 'Active' ? 'bg-success' : 'bg-success bg-opacity-50' %>" style="cursor:pointer; transition: transform 0.15s;">
+          <div class="card-body">
+            <h6 class="card-title"><i class="bi bi-check-circle"></i> Active Contracts</h6>
+            <h2 class="mb-0"><%= activeCount %></h2>
+            <small class="opacity-75">Click to filter</small>
+          </div>
+        </div>
+      </a>
+    </div>
+    <div class="col-md-3">
+      <a href="/contracts?expiring=1" class="text-decoration-none">
+        <div class="card border-0 shadow-sm text-white <%= expiring ? 'bg-warning' : 'bg-warning bg-opacity-50' %>" style="cursor:pointer; transition: transform 0.15s;">
+          <div class="card-body">
+            <h6 class="card-title"><i class="bi bi-exclamation-triangle"></i> Expiring Soon (60 days)</h6>
+            <h2 class="mb-0"><%= expiringCount %></h2>
+            <small class="opacity-75">Click to filter</small>
+          </div>
+        </div>
+      </a>
+    </div>
+    <div class="col-md-3">
+      <a href="/contracts?status=Expired" class="text-decoration-none">
+        <div class="card border-0 shadow-sm text-white <%= status === 'Expired' ? 'bg-secondary' : 'bg-secondary bg-opacity-50' %>" style="cursor:pointer; transition: transform 0.15s;">
+          <div class="card-body">
+            <h6 class="card-title"><i class="bi bi-clock-history"></i> Expired</h6>
+            <h2 class="mb-0"><%= expiredCount %></h2>
+            <small class="opacity-75">Click to filter</small>
+          </div>
+        </div>
+      </a>
+    </div>
+    <div class="col-md-3">
+      <a href="/contracts?status=No+Contract" class="text-decoration-none">
+        <div class="card border-0 shadow-sm text-white <%= status === 'No Contract' ? 'bg-danger' : 'bg-danger bg-opacity-50' %>" style="cursor:pointer; transition: transform 0.15s;">
+          <div class="card-body">
+            <h6 class="card-title"><i class="bi bi-exclamation-octagon"></i> No Contract</h6>
+            <h2 class="mb-0"><%= noContractCount %></h2>
+            <small class="opacity-75">Click to filter</small>
+          </div>
+        </div>
+      </a>
+    </div>
+  </div>
+  <div class="card border-0 shadow-sm">
+    <div class="card-body">
+      <% if (status || expiring) { %>
+      <div class="d-flex align-items-center mb-3 p-2 bg-light rounded">
+        <i class="bi bi-funnel-fill text-primary me-2"></i>
+        <strong class="me-2">Filtered by:</strong>
+        <% if (status === 'No Contract') { %><span class="badge bg-danger me-1">No Contract</span>
+        <% } else if (status) { %><span class="badge bg-success me-1"><%= status %></span><% } %>
+        <% if (expiring) { %><span class="badge bg-warning text-dark me-1">Expiring Soon</span><% } %>
+        <span class="text-muted ms-2 me-3">Showing <%= total %> of <%= totalEmployees %> employees</span>
+        <a href="/contracts" class="btn btn-sm btn-outline-secondary"><i class="bi bi-x-lg"></i> Clear Filter</a>
+      </div>
+      <% } %>
+      <form method="GET" class="row g-2 mb-3">
+        <div class="col-md-3">
+          <input type="text" name="search" class="form-control" placeholder="Search employee name or ID..." value="<%= search %>">
+        </div>
+        <div class="col-md-2">
+          <select name="status" class="form-select">
+            <option value="">All Status</option>
+            <option value="Active" <%= status === 'Active' ? 'selected' : '' %>>Active</option>
+            <option value="Expired" <%= status === 'Expired' ? 'selected' : '' %>>Expired</option>
+            <option value="Terminated" <%= status === 'Terminated' ? 'selected' : '' %>>Terminated</option>
+            <option value="Completed" <%= status === 'Completed' ? 'selected' : '' %>>Completed</option>
+            <option value="No Contract" <%= status === 'No Contract' ? 'selected' : '' %>>No Contract</option>
+          </select>
+        </div>
+        <div class="col-md-2 d-flex align-items-center">
+          <div class="form-check">
+            <input class="form-check-input" type="checkbox" name="expiring" id="expiringCheck" value="1" <%= expiring ? 'checked' : '' %> onchange="this.form.submit()">
+            <label class="form-check-label" for="expiringCheck">Expiring Soon</label>
+          </div>
+        </div>
+        <div class="col-md-1">
+          <button type="submit" class="btn btn-outline-primary w-100"><i class="bi bi-search"></i></button>
+        </div>
+      </form>
+      <div class="table-responsive">
+        <table class="table table-hover">
+          <thead class="table-dark">
+            <tr>
+              <th>Employee Name</th>
+              <th>ID</th>
+              <th>Position</th>
+              <th>Type</th>
+              <th>Daily Rate</th>
+              <th>Monthly Rate</th>
+              <th>Start</th>
+              <th>End</th>
+              <th>Status</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            <% if (contracts.length === 0) { %>
+              <tr><td colspan="10" class="text-center text-muted py-4">No records found</td></tr>
+            <% } else { %>
+              <% contracts.forEach(c => { %>
+              <tr class="<%= c.id && c.is_expiring ? 'table-danger' : (!c.id ? 'table-warning' : '') %>">
+                <td class="fw-medium"><%= c.full_name %></td>
+                <td><%= c.emp_rec_id %></td>
+                <td><%= c.position || '--' %></td>
+                <td><%= c.contract_type || '--' %></td>
+                <td><%= c.daily_rate ? '₱' + Number(c.daily_rate).toLocaleString() : '--' %></td>
+                <td><%= c.monthly_rate ? '₱' + Number(c.monthly_rate).toLocaleString() : '--' %></td>
+                <td><%= c.start_date ? new Date(c.start_date).toLocaleDateString() : '--' %></td>
+                <td class="<%= c.id && c.is_expiring ? 'text-danger fw-bold' : '' %>"><%= c.end_date ? new Date(c.end_date).toLocaleDateString() : '--' %></td>
+                <td>
+                  <% if (!c.id) { %>
+                    <span class="badge bg-danger">No Contract</span>
+                  <% } else { %>
+                    <span class="badge bg-<%= c.status === 'Active' ? 'success' : c.status === 'Expired' ? 'secondary' : c.status === 'Terminated' ? 'danger' : 'info' %>"><%= c.status %></span>
+                  <% } %>
+                </td>
+                <td>
+                  <% if (!c.id) { %>
+                    <a href="/contracts/add?emp=<%= c.emp_id %>" class="btn btn-sm btn-outline-success" title="Create Contract"><i class="bi bi-plus-lg"></i></a>
+                  <% } else { %>
+                    <a href="/contracts/view/<%= c.id %>" class="btn btn-sm btn-outline-info" title="View"><i class="bi bi-eye"></i></a>
+                    <a href="/contracts/edit/<%= c.id %>" class="btn btn-sm btn-outline-warning" title="Edit"><i class="bi bi-pencil"></i></a>
+                  <% } %>
+                </td>
+              </tr>
+              <% }) %>
+            <% } %>
+          </tbody>
+        </table>
+      </div>
+      <% if (pages > 1) { %>
+      <nav><ul class="pagination pagination-sm justify-content-center">
+        <% for (var i = 1; i <= pages; i++) { %>
+          <li class="page-item <%= i === page ? 'active' : '' %>">
+            <a class="page-link" href="?page=<%= i %><%= search ? '&search=' + search : '' %><%= status ? '&status=' + status : '' %><%= expiring ? '&expiring=1' : '' %>"><%= i %></a>
+          </li>
+        <% } %>
+      </ul></nav>
+      <% } %>
+    </div>
+  </div>
+</div>
+<style>
+  .card[style*="cursor:pointer"]:hover { transform: translateY(-3px); box-shadow: 0 .5rem 1rem rgba(0,0,0,.15) !important; }
+</style>

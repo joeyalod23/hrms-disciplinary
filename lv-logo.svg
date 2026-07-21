@@ -1,0 +1,35 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 100" width="900" height="100">
+  <defs>
+    <style>
+      .logo-text {
+        font-family: 'Arial Black', 'Arial', 'Helvetica', sans-serif;
+        font-weight: 900;
+        font-style: italic;
+        fill: #f0f0f0;
+        font-size: 28px;
+        letter-spacing: 7px;
+      }
+    </style>
+  </defs>
+
+  <!-- Thin navy extension at very top (double-border look) -->
+  <rect x="0" y="0" width="900" height="3" fill="#0b1a3a"/>
+
+  <!-- Main deep navy blue background -->
+  <rect x="0" y="3" width="900" height="94" fill="#0b1a3a"/>
+
+  <!-- Thin navy extension at very bottom (double-border look) -->
+  <rect x="0" y="97" width="900" height="3" fill="#0b1a3a"/>
+
+  <!-- Top horizontal white frame line -->
+  <rect x="0" y="18" width="900" height="3" fill="#ffffff"/>
+
+  <!-- Bottom horizontal white frame line -->
+  <rect x="0" y="79" width="900" height="3" fill="#ffffff"/>
+
+  <!-- Text centered between the two white lines, italicized via skew -->
+  <text x="450" y="57" class="logo-text" text-anchor="middle" transform="skewX(-14)">L.V. LEDESMA CONSTRUCTION, INC.</text>
+
+  <!-- Vertical cropped-edge artifact line on far right -->
+  <line x1="897" y1="0" x2="897" y2="100" stroke="#ffffff" stroke-width="1" opacity="0.25"/>
+</svg>

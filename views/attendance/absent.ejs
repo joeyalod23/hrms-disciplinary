@@ -1,0 +1,45 @@
+<div class="container-fluid px-4 py-4">
+  <div class="d-flex justify-content-between align-items-center mb-4">
+    <h4 class="fw-bold"><i class="bi bi-person-x-fill"></i> Absent Employees</h4>
+    <div>
+      <a href="/attendance/absent?date=<%= date %>" class="btn btn-outline-primary btn-sm"><i class="bi bi-arrow-clockwise"></i> Refresh</a>
+      <a href="/attendance" class="btn btn-outline-secondary btn-sm"><i class="bi bi-arrow-left"></i> Back to Attendance</a>
+    </div>
+  </div>
+
+  <div class="card border-0 shadow-sm">
+    <div class="card-body">
+      <form method="GET" class="row g-2 mb-3">
+        <div class="col-md-3">
+          <label class="form-label small">Select Date</label>
+          <input type="date" name="date" class="form-control" value="<%= date %>">
+        </div>
+        <div class="col-md-1 d-flex align-items-end">
+          <button type="submit" class="btn btn-outline-primary"><i class="bi bi-search"></i> View</button>
+        </div>
+      </form>
+      <div class="table-responsive">
+        <table class="table table-hover">
+          <thead class="table-dark">
+            <tr><th>Employee ID</th><th>Full Name</th><th>Position</th><th>Department</th></tr>
+          </thead>
+          <tbody>
+            <% if (absent.length === 0) { %>
+              <tr><td colspan="4" class="text-center text-muted py-4">All employees are present on <%= new Date(date).toLocaleDateString() %></td></tr>
+            <% } else { %>
+              <% absent.forEach(e => { %>
+              <tr>
+                <td><%= e.employee_id %></td>
+                <td><%= e.full_name %></td>
+                <td><%= e.position || '--' %></td>
+                <td><%= e.department || '--' %></td>
+              </tr>
+              <% }) %>
+            <% } %>
+          </tbody>
+        </table>
+      </div>
+      <p class="text-muted small mb-0">Total absent: <strong><%= absent.length %></strong> (for <%= new Date(date).toLocaleDateString() %>)</p>
+    </div>
+  </div>
+</div>

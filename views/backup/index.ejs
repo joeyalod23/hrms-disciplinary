@@ -1,0 +1,56 @@
+<link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.2/font/bootstrap-icons.css" rel="stylesheet">
+<div class="container-fluid px-4 py-4">
+<div class="d-flex justify-content-between align-items-center mb-4">
+<div>
+<h2 class="fw-bold mb-1"><i class="bi bi-cloud-arrow-down me-2"></i>Backup &amp; Recovery</h2>
+<p class="text-muted mb-0">Create and manage database backups</p>
+</div>
+<button class="btn btn-primary" onclick="createBackup()"><i class="bi bi-plus-circle me-1"></i> Create Backup</button>
+</div>
+
+<div class="card border-0 shadow-sm">
+<div class="card-header bg-white py-3"><h6 class="mb-0 fw-bold"><i class="bi bi-archive me-2"></i>Available Backups</h6></div>
+<div class="card-body p-0">
+<div class="table-responsive">
+<table class="table table-hover mb-0">
+<thead class="table-light"><tr><th class="py-3">Filename</th><th class="py-3">Size</th><th class="py-3">Date</th><th class="py-3 text-end">Actions</th></tr></thead>
+<tbody>
+<% if (backups.length === 0) { %>
+<tr><td colspan="4" class="text-center py-4 text-muted">No backups yet</td></tr>
+<% } else { %>
+<% backups.forEach(b => { %>
+<tr>
+<td class="py-2"><code><%= b.name %></code></td>
+<td class="py-2"><%= (b.size / 1024 / 1024).toFixed(2) %> MB</td>
+<td class="py-2"><%= new Date(b.date).toLocaleString() %></td>
+<td class="py-2 text-end">
+<button class="btn btn-sm btn-danger" onclick="deleteBackup('<%= b.name %>')"><i class="bi bi-trash"></i></button>
+</td>
+</tr>
+<% }) %>
+<% } %>
+</tbody>
+</table>
+</div>
+</div>
+</div>
+</div>
+
+<%- include('../partials/toast') %>
+<script>
+async function createBackup() {
+  try {
+    const res = await fetch('/backup/create', { method: 'POST' });
+    const data = await res.json();
+    showToast('Backup created: ' + data.filename, 'success');
+    setTimeout(() => location.reload(), 1000);
+  } catch (e) { showToast(e.message, 'error'); }
+}
+async function deleteBackup(name) {
+  if (!confirm('Delete this backup?')) return;
+  try {
+    await fetch('/backup/' + encodeURIComponent(name), { method: 'DELETE' });
+    location.reload();
+  } catch (e) { showToast(e.message, 'error'); }
+}
+</script>

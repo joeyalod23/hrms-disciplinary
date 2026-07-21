@@ -1,0 +1,557 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>HRMS — User Manual</title>
+<style>
+  @page { margin: 2cm; }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { font-family: 'Segoe UI', 'Helvetica Neue', Arial, sans-serif; font-size: 11pt; line-height: 1.6; color: #1a1a1a; padding: 2cm; max-width: 210mm; margin: 0 auto; }
+  h1 { font-size: 22pt; color: #0d3b66; border-bottom: 3px solid #0d3b66; padding-bottom: 8px; margin-top: 0; margin-bottom: 20px; }
+  h2 { font-size: 16pt; color: #0d3b66; margin-top: 30px; margin-bottom: 10px; padding-bottom: 4px; border-bottom: 1px solid #ccc; }
+  h3 { font-size: 13pt; color: #1a5276; margin-top: 20px; margin-bottom: 8px; }
+  h4 { font-size: 11pt; color: #333; margin-top: 15px; margin-bottom: 6px; }
+  p { margin-bottom: 10px; }
+  ul, ol { margin-bottom: 10px; padding-left: 25px; }
+  li { margin-bottom: 4px; }
+  table { width: 100%; border-collapse: collapse; margin: 15px 0; font-size: 10pt; }
+  th { background: #0d3b66; color: #fff; padding: 8px 10px; text-align: left; font-weight: 600; }
+  td { padding: 6px 10px; border-bottom: 1px solid #ddd; }
+  tr:nth-child(even) td { background: #f7f9fb; }
+  .cover { text-align: center; padding: 60px 0 40px; page-break-after: always; }
+  .cover h1 { font-size: 28pt; border: none; margin-bottom: 5px; }
+  .cover .subtitle { font-size: 16pt; color: #555; margin-bottom: 40px; }
+  .cover .meta { font-size: 11pt; color: #777; line-height: 2; }
+  .cover .logo { font-size: 36pt; font-weight: 800; color: #0d3b66; margin-bottom: 20px; letter-spacing: 2px; }
+  .section { page-break-inside: avoid; }
+  .step { background: #f8f9fa; border-left: 4px solid #0d3b66; padding: 10px 14px; margin: 8px 0; border-radius: 0 4px 4px 0; }
+  .step strong { color: #0d3b66; display: block; margin-bottom: 2px; }
+  .note { background: #fff9e6; border-left: 4px solid #ffc107; padding: 10px 14px; margin: 10px 0; border-radius: 0 4px 4px 0; font-size: 10pt; }
+  .tip { background: #e8f5e9; border-left: 4px solid #4caf50; padding: 10px 14px; margin: 10px 0; border-radius: 0 4px 4px 0; font-size: 10pt; }
+  .warning { background: #fce4ec; border-left: 4px solid #e53935; padding: 10px 14px; margin: 10px 0; border-radius: 0 4px 4px 0; font-size: 10pt; }
+  .toc { margin: 30px 0; columns: 2; }
+  .toc li { margin-bottom: 6px; break-inside: avoid; }
+  .toc a { color: #0d3b66; text-decoration: none; }
+  .page-break { page-break-before: always; }
+  footer { text-align: center; color: #999; font-size: 9pt; margin-top: 40px; border-top: 1px solid #ddd; padding-top: 10px; }
+  kbd { background: #333; color: #fff; padding: 2px 6px; border-radius: 3px; font-size: 9pt; font-family: monospace; }
+  @media print { body { padding: 0; } .toc { columns: 2; } }
+</style>
+</head>
+<body>
+
+<!-- Cover -->
+<div class="cover">
+  <div class="logo">HRMS</div>
+  <h1>User Manual</h1>
+  <p class="subtitle">Integrated Site Human Resource Management System</p>
+  <div class="meta">
+    <p><strong>Version:</strong> 2.0.0</p>
+    <p><strong>June 2026</strong></p>
+  </div>
+</div>
+
+<!-- TOC -->
+<div class="page-break"></div>
+<h2>Table of Contents</h2>
+<ol class="toc">
+  <li><a href="#getting-started">Getting Started</a></li>
+  <li><a href="#dashboard">Dashboard</a></li>
+  <li><a href="#employees">Employees</a></li>
+  <li><a href="#attendance">Attendance</a></li>
+  <li><a href="#incidents">Incident Reports</a></li>
+  <li><a href="#nov">Notice of Violation</a></li>
+  <li><a href="#nte">Notice to Explain</a></li>
+  <li><a href="#cases">Disciplinary Cases</a></li>
+  <li><a href="#hearings">Hearings</a></li>
+  <li><a href="#contracts">Contracts</a></li>
+  <li><a href="#recruitment">Recruitment &amp; PRF</a></li>
+  <li><a href="#prf-monitor">PRF Monitor</a></li>
+  <li><a href="#manpower">Manpower</a></li>
+  <li><a href="#fieldchecking">Field Checking</a></li>
+  <li><a href="#bunkhouse">Bunkhouse</a></li>
+  <li><a href="#atd">Authorization to Deduct</a></li>
+  <li><a href="#compliance">Compliance Calendar</a></li>
+  <li><a href="#vault">Document Vault</a></li>
+  <li><a href="#reports">Reports</a></li>
+  <li><a href="#audit">Audit Log</a></li>
+  <li><a href="#troubleshooting">Troubleshooting</a></li>
+</ol>
+
+<!-- 1. Getting Started -->
+<div class="page-break section" id="getting-started">
+<h2>1. Getting Started</h2>
+
+<h3>1.1 Accessing the System</h3>
+<p>Open your web browser (Google Chrome, Mozilla Firefox, or Microsoft Edge recommended) and navigate to the system URL provided by your administrator.</p>
+
+<h3>1.2 Logging In</h3>
+<div class="step"><strong>Step 1:</strong> On the login page, enter your username and password.</div>
+<div class="step"><strong>Step 2:</strong> Click the <kbd>Sign In</kbd> button.</div>
+<div class="step"><strong>Step 3:</strong> Upon successful authentication, you will be redirected to the Dashboard.</div>
+<div class="note"><strong>Note:</strong> If you enter incorrect credentials, an error message will appear. Contact your administrator if you have forgotten your password.</div>
+
+<h3>1.3 User Roles</h3>
+<table>
+  <tr><th>Role</th><th>Description</th></tr>
+  <tr><td><strong>Admin</strong></td><td>Full system access including user management, audit logs, and compliance configuration.</td></tr>
+  <tr><td><strong>HRD</strong></td><td>Access to all HR operational modules, compliance management, and audit log viewing.</td></tr>
+  <tr><td><strong>User</strong></td><td>Day-to-day operations: data entry, viewing records, and running reports.</td></tr>
+</table>
+
+<h3>1.4 Navigation</h3>
+<p>The sidebar on the left provides access to all system modules. Click on a menu item to navigate. Collapsible sections group related modules together:</p>
+<ul>
+  <li><strong>HR Management</strong> — Employees, Attendance, Manpower, Cases, Contracts</li>
+  <li><strong>Recruitment</strong> — PRF Requests, Applicants, PRF Monitor</li>
+  <li><strong>Site Operations</strong> — Field Checking, Bunkhouse, ATD, Incident Reports, NTE, NoV</li>
+  <li><strong>Compliance, Reports, Document Vault, Audit Log</strong> — Standalone modules</li>
+</ul>
+<div class="tip"><strong>Tip:</strong> On mobile devices, tap the <kbd>☰</kbd> button to show/hide the sidebar.</div>
+
+<h3>1.5 Logging Out</h3>
+<p>Click <strong>Logout</strong> at the bottom of the sidebar to end your session. Always log out when using shared computers.</p>
+</div>
+
+<!-- 2. Dashboard -->
+<div class="page-break section" id="dashboard">
+<h2>2. Dashboard</h2>
+<p>The Dashboard is the system's home page, providing a real-time overview of key HR metrics.</p>
+
+<h3>2.1 Statistics Cards</h3>
+<p>The top section displays six clickable cards showing:</p>
+<ul>
+  <li><strong>Total Employees</strong> — Click to go to the Employees list</li>
+  <li><strong>Present Today</strong> — Click to go to Attendance</li>
+  <li><strong>Open Cases</strong> — Click to go to Disciplinary Cases</li>
+  <li><strong>Expiring Contracts</strong> — Click to go to Contracts with expiring filter</li>
+  <li><strong>Bunkhouse Beds</strong> — Click to go to Bunkhouse management</li>
+  <li><strong>Active ATDs</strong> — Click to go to ATD management</li>
+</ul>
+
+<h3>2.2 Charts</h3>
+<ul>
+  <li><strong>Monthly Case Trends</strong> — Line chart showing disciplinary cases over the last 6 months</li>
+  <li><strong>Cases by Status</strong> — Doughnut chart showing case status distribution</li>
+  <li><strong>Severity Breakdown</strong> — Doughnut chart showing Light/Less Serious/Serious offense proportions</li>
+</ul>
+
+<h3>2.3 Widgets</h3>
+<ul>
+  <li><strong>Today's Tasks</strong> — Pending compliance tasks with priority indicators and due dates</li>
+  <li><strong>Recent Cases</strong> — Most recently created disciplinary cases with status badges</li>
+  <li><strong>Upcoming Hearings</strong> — Scheduled hearings with dates</li>
+  <li><strong>Top 10 Offenses</strong> — Most common offenses with COD codes and counts</li>
+  <li><strong>Repeat Offenders</strong> — Employees with multiple cases</li>
+  <li><strong>Expiring Contracts</strong> — Contracts expiring within 30 days</li>
+  <li><strong>Recent Activity</strong> — Latest audit log entries</li>
+</ul>
+</div>
+
+<!-- 3. Employees -->
+<div class="page-break section" id="employees">
+<h2>3. Employees</h2>
+
+<h3>3.1 Viewing Employees</h3>
+<p>Navigate to <strong>HR Management → Employees</strong> to see the employee list. You can:</p>
+<ul>
+  <li><strong>Search</strong> by name, employee ID, department, or position using the search bar</li>
+  <li><strong>Filter</strong> by status using the status badges (Active, Inactive, Resigned, Terminated)</li>
+  <li><strong>Navigate</strong> pages using the pagination controls at the bottom</li>
+</ul>
+
+<h3>3.2 Adding an Employee</h3>
+<div class="step"><strong>Step 1:</strong> Click the <kbd>+ Add Employee</kbd> button.</div>
+<div class="step"><strong>Step 2:</strong> Fill in the employee details. Required fields are marked.</div>
+<div class="step"><strong>Step 3:</strong> Click <kbd>Save</kbd> to create the record.</div>
+
+<h3>3.3 Editing an Employee</h3>
+<p>Click the <kbd>Edit</kbd> button next to any employee in the list. Modify the desired fields and click <kbd>Save</kbd>.</p>
+
+<h3>3.4 Viewing Employee Details</h3>
+<p>Click an employee's name to view their full profile, including linked disciplinary cases, contracts, attendance records, and active ATDs.</p>
+</div>
+
+<!-- 4. Attendance -->
+<div class="page-break section" id="attendance">
+<h2>4. Attendance</h2>
+
+<h3>4.1 Recording Daily Attendance</h3>
+<p>Navigate to <strong>HR Management → Attendance</strong>.</p>
+<div class="step"><strong>Step 1:</strong> Select the month and year using the filter controls.</div>
+<div class="step"><strong>Step 2:</strong> Click <kbd>+ Record Attendance</kbd>.</div>
+<div class="step"><strong>Step 3:</strong> Search and select the employee.</div>
+<div class="step"><strong>Step 4:</strong> Enter the date, time-in/out (AM/PM/OT), and select the status.</div>
+<div class="step"><strong>Step 5:</strong> Click <kbd>Save</kbd>.</div>
+<div class="tip"><strong>Tip:</strong> If a record already exists for the same employee and date, the system will update it instead of creating a duplicate.</div>
+
+<h3>4.2 Monthly Summary</h3>
+<p>Navigate to <strong>HR Management → Summary</strong> to view per-employee monthly attendance summaries with totals for working days, tardiness, leaves, and absences.</p>
+
+<h3>4.3 Exporting Attendance</h3>
+<p>Click the <kbd>CSV</kbd> button to download attendance records for the selected month in CSV format for payroll processing.</p>
+</div>
+
+<!-- 5. Incident Reports -->
+<div class="page-break section" id="incidents">
+<h2>5. Incident Reports</h2>
+<p>The Incident Reports module (F-HRD-023 form) is the starting point for the disciplinary due process.</p>
+
+<h3>5.1 Creating an Incident Report</h3>
+<div class="step"><strong>Step 1:</strong> Navigate to <strong>Site Operations → Incident Reports</strong>.</div>
+<div class="step"><strong>Step 2:</strong> Click <kbd>+ New Incident Report</kbd>.</div>
+<div class="step"><strong>Step 3:</strong> Fill in the alleged violator's details, incident information, location, witnesses, and narrative description.</div>
+<div class="step"><strong>Step 4:</strong> Click <kbd>Save</kbd>.</div>
+
+<h3>5.2 Using OCR for Scanned Forms</h3>
+<div class="step"><strong>Step 1:</strong> Click <kbd>OCR Upload</kbd> to upload a scanned F-HRD-023 form image.</div>
+<div class="step"><strong>Step 2:</strong> The system will extract text and pre-fill form fields automatically.</div>
+<div class="step"><strong>Step 3:</strong> Review and correct any extracted data before saving.</div>
+<div class="note"><strong>Note:</strong> OCR accuracy depends on image quality and handwriting legibility. Always verify extracted data.</div>
+
+<h3>5.3 Issuing NTE from Incident Report</h3>
+<p>From the incident report view, click <kbd>Issue NTE</kbd> to automatically generate a Notice to Explain with pre-filled incident details.</p>
+
+<h3>5.4 Viewing &amp; Printing</h3>
+<p>Click on an incident report to view details. Use the <kbd>Print</kbd> button for a print-friendly version.</p>
+</div>
+
+<!-- 6. Notice of Violation -->
+<div class="page-break section" id="nov">
+<h2>6. Notice of Violation (NoV)</h2>
+
+<h3>6.1 Creating an NoV</h3>
+<div class="step"><strong>Step 1:</strong> Navigate to <strong>Site Operations → NoV</strong>.</div>
+<div class="step"><strong>Step 2:</strong> Click <kbd>+ New NoV</kbd>.</div>
+<div class="step"><strong>Step 3:</strong> Select the linked incident report, enter findings and recommended actions.</div>
+<div class="step"><strong>Step 4:</strong> Click <kbd>Save</kbd>.</div>
+
+<h3>6.2 NoV Workflow</h3>
+<p>The NoV follows a four-stage workflow:</p>
+<ol>
+  <li><strong>Draft</strong> — Initial creation, editable by site staff</li>
+  <li><strong>Submitted to Main Office</strong> — Sent for review with date tracking</li>
+  <li><strong>Reviewed</strong> — Main Office provides feedback and notes</li>
+  <li><strong>Returned to Site</strong> — Final status after main office processing</li>
+</ol>
+<p>Use the action buttons in the view page to advance the status.</p>
+</div>
+
+<!-- 7. Notice to Explain -->
+<div class="page-break section" id="nte">
+<h2>7. Notice to Explain (NTE)</h2>
+
+<h3>7.1 Creating an NTE</h3>
+<div class="step"><strong>Step 1:</strong> Navigate to <strong>Site Operations → NTE</strong>.</div>
+<div class="step"><strong>Step 2:</strong> Click <kbd>+ New NTE</kbd>.</div>
+<div class="step"><strong>Step 3:</strong> Select the employee via the search field, choose the offense category (COD-coded), and fill in incident details.</div>
+<div class="step"><strong>Step 4:</strong> Enter the NTE body text — this can be auto-populated if created from an Incident Report.</div>
+<div class="step"><strong>Step 5:</strong> Click <kbd>Save</kbd>.</div>
+
+<h3>7.2 NTE Lifecycle</h3>
+<ol>
+  <li><strong>Draft</strong> — Newly created, editable</li>
+  <li><strong>Issue/Serve</strong> — Record service details: date received, employee signature, or refusal with witness. The 5-day explanation deadline is auto-calculated.</li>
+  <li><strong>Reply</strong> — Record the employee's written explanation</li>
+  <li><strong>Resolve</strong> — Enter the final decision/resolution</li>
+  <li><strong>Close</strong> — Final closure of the NTE</li>
+</ol>
+
+<h3>7.3 Preventive Suspension</h3>
+<p>During the NTE process, you can record preventive suspension details (number of days, effective date, return date) if applicable.</p>
+
+<h3>7.4 Printing an NTE</h3>
+<p>Click the <kbd>Print</kbd> button on the NTE view page for a print-friendly version suitable for physical serving.</p>
+</div>
+
+<!-- 8. Disciplinary Cases -->
+<div class="page-break section" id="cases">
+<h2>8. Disciplinary Cases</h2>
+
+<h3>8.1 Creating a Case</h3>
+<div class="step"><strong>Step 1:</strong> Navigate to <strong>HR Management → Disciplinary Cases</strong>.</div>
+<div class="step"><strong>Step 2:</strong> Click <kbd>+ New Case</kbd>.</div>
+<div class="step"><strong>Step 3:</strong> Search and select the employee. Assign an offense category (COD-coded).</div>
+<div class="step"><strong>Step 4:</strong> Fill in case details: incident date, description, linked incident report (if applicable), and memo number.</div>
+<div class="step"><strong>Step 5:</strong> Click <kbd>Save</kbd>. The system auto-generates a case number (DC-YYYY-NNNN).</div>
+
+<h3>8.2 Managing Case Documents</h3>
+<p>From the case view page, you can:</p>
+<ul>
+  <li><strong>Upload documents</strong> — Incident reports, NTEs, investigation reports, verdicts, appeals</li>
+  <li><strong>Delete documents</strong> — Remove incorrectly uploaded files</li>
+</ul>
+
+<h3>8.3 Adding Case Notes</h3>
+<p>Internal notes can be added to cases for documentation purposes. Notes are timestamped and show the author.</p>
+
+<h3>8.4 Managing Verdict</h3>
+<p>When a case is resolved, record the verdict details: penalty, decided by, served by, received by, and received date. Upload the verdict document if available.</p>
+
+<h3>8.5 Closing a Case</h3>
+<p>Set the case status to <strong>Resolved</strong> or <strong>Dismissed</strong> once all proceedings are complete. Record the closure date and resolution details.</p>
+</div>
+
+<!-- 9. Hearings -->
+<div class="page-break section" id="hearings">
+<h2>9. Hearings</h2>
+
+<h3>9.1 Scheduling a Hearing</h3>
+<div class="step"><strong>Step 1:</strong> Navigate to <strong>HR Management → Hearings</strong>.</div>
+<div class="step"><strong>Step 2:</strong> Click <kbd>+ New Hearing</kbd>.</div>
+<div class="step"><strong>Step 3:</strong> Select the disciplinary case, set the hearing date and time, add notes.</div>
+<div class="step"><strong>Step 4:</strong> Click <kbd>Save</kbd>. The parent case status auto-updates to "For Hearing".</div>
+
+<h3>9.2 Hearing Status Workflow</h3>
+<p>Update the hearing status as it progresses: Scheduled → Ongoing → Completed → Cancelled.</p>
+</div>
+
+<!-- 10. Contracts -->
+<div class="page-break section" id="contracts">
+<h2>10. Contracts</h2>
+
+<h3>10.1 Creating a Contract</h3>
+<div class="step"><strong>Step 1:</strong> Navigate to <strong>HR Management → Contracts</strong>.</div>
+<div class="step"><strong>Step 2:</strong> Click <kbd>+ New Contract</kbd>.</div>
+<div class="step"><strong>Step 3:</strong> Search and select the employee, enter contract type, rates, start/end dates, and project site.</div>
+<div class="step"><strong>Step 4:</strong> Click <kbd>Save</kbd>. The employee's daily/monthly rates and date_hired are auto-updated.</div>
+
+<h3>10.2 Extending a Contract</h3>
+<p>From the contract view page, click <kbd>Extend</kbd>. Enter the extension date range, reason, and memo number. The system auto-updates the contract's end date.</p>
+
+<h3>10.3 Viewing Expiring Contracts</h3>
+<p>Use the <kbd>Expiring in 30 Days</kbd> filter to see contracts nearing expiration. These are also highlighted on the Dashboard.</p>
+
+<h3>10.4 Exporting Contracts</h3>
+<p>Click <kbd>CSV</kbd> to download all contracts in CSV format.</p>
+</div>
+
+<!-- 11. Recruitment -->
+<div class="page-break section" id="recruitment">
+<h2>11. Recruitment &amp; PRF</h2>
+
+<h3>11.1 Creating a PRF Request</h3>
+<div class="step"><strong>Step 1:</strong> Navigate to <strong>Recruitment → PRF Requests</strong>.</div>
+<div class="step"><strong>Step 2:</strong> Click <kbd>+ New Request</kbd>.</div>
+<div class="step"><strong>Step 3:</strong> Fill in department, position, trade, skilled/non-skilled counts, and signatories.</div>
+<div class="step"><strong>Step 4:</strong> Click <kbd>Save</kbd>.</div>
+
+<h3>11.2 Managing Applicants</h3>
+<p>From the recruitment view page, manage applicants through the pipeline:</p>
+<ol>
+  <li><strong>For Screening</strong> — Initial application received</li>
+  <li><strong>For Interview</strong> — Scheduled for interview</li>
+  <li><strong>For Medical</strong> — Undergoing medical examination</li>
+  <li><strong>For Orientation</strong> — Cleared for onboarding</li>
+  <li><strong>Hired</strong> — System auto-creates employee record</li>
+  <li><strong>Rejected / No Response</strong> — Discontinued</li>
+</ol>
+
+<h3>11.3 Pre-Employment Checklist</h3>
+<p>Track document completeness for each applicant using the pre-employment checklist. Mark items as completed as requirements are submitted.</p>
+</div>
+
+<!-- 12. PRF Monitor -->
+<div class="page-break section" id="prf-monitor">
+<h2>12. PRF Monitor</h2>
+<p>The PRF Monitor provides a real-time dashboard of hiring status across all projects.</p>
+
+<h3>12.1 Dashboard View</h3>
+<p>Upon navigating to <strong>Recruitment → PRF Monitor</strong>, you'll see a summary of all projects with requested vs. hired counts.</p>
+
+<h3>12.2 Project Drill-Down</h3>
+<p>Click on a project to see individual PRF line items with their applicants and hiring status.</p>
+
+<h3>12.3 Managing PRFs &amp; Applicants</h3>
+<p>Within a project view, you can:</p>
+<ul>
+  <li><strong>Create new PRFs</strong> — Add new manpower requests</li>
+  <li><strong>Add applicants</strong> — Link applicants to specific PRF line items</li>
+  <li><strong>Edit/Delete</strong> — Modify or remove PRFs and applicants</li>
+</ul>
+<p>Click on any PRF line to view its detailed page with full applicant list and stats.</p>
+</div>
+
+<!-- 13. Manpower -->
+<div class="page-break section" id="manpower">
+<h2>13. Manpower</h2>
+
+<h3>13.1 Manpower Loading</h3>
+<p>Navigate to <strong>HR Management → Manpower</strong>. The top section shows manpower loading targets by trade. Add new loading entries or delete existing ones.</p>
+
+<h3>13.2 Team Management</h3>
+<p>View all teams with their leadman/foreman assignments and member counts. Click on a team to view its roster.</p>
+
+<h3>13.3 Employee Assignments</h3>
+<p>Assign employees to project sites and teams. The system automatically ends any previous active assignment for the same employee to prevent double-booking.</p>
+</div>
+
+<!-- 14. Field Checking -->
+<div class="page-break section" id="fieldchecking">
+<h2>14. Field Checking</h2>
+
+<h3>14.1 Creating an Inspection Report</h3>
+<div class="step"><strong>Step 1:</strong> Navigate to <strong>Site Operations → Field Checking</strong>.</div>
+<div class="step"><strong>Step 2:</strong> Click <kbd>+ New Inspection</kbd>.</div>
+<div class="step"><strong>Step 3:</strong> Enter inspection date/time, project site, inspector, foreman, and leadman details.</div>
+<div class="step"><strong>Step 4:</strong> Add violations found: employee name, designation, violation description, and action taken. Upload photo evidence.</div>
+<div class="step"><strong>Step 5:</strong> Click <kbd>Save</kbd>.</div>
+
+<h3>14.2 Updating Inspection Status</h3>
+<p>From the inspection view, update the status: Open → Addressed → Closed as corrective actions are completed.</p>
+</div>
+
+<!-- 15. Bunkhouse -->
+<div class="page-break section" id="bunkhouse">
+<h2>15. Bunkhouse Management</h2>
+
+<h3>15.1 Managing Rooms</h3>
+<div class="step"><strong>Step 1:</strong> Navigate to <strong>Site Operations → Bunkhouse</strong>.</div>
+<div class="step"><strong>Step 2:</strong> Click <kbd>+ Add Room</kbd> to add a new bunkhouse room (room number, capacity, bunkhouse name).</div>
+
+<h3>15.2 Managing Occupants</h3>
+<div class="step"><strong>Step 1:</strong> Click <kbd>+ Add Occupant</kbd> to assign someone to a room.</div>
+<div class="step"><strong>Step 2:</strong> Select or search for the employee, or type a name manually for non-employees.</div>
+<div class="step"><strong>Step 3:</strong> Set the start date, rental rate (default Php 100), and frequency (Weekly/Monthly/One Time).</div>
+
+<h3>15.3 Checking Out Occupants</h3>
+<p>Click <kbd>Check Out</kbd> on an occupant's record to set the end date and deactivate the assignment. The room's occupant count is automatically updated.</p>
+</div>
+
+<!-- 16. ATD -->
+<div class="page-break section" id="atd">
+<h2>16. Authorization to Deduct (ATD)</h2>
+
+<h3>16.1 Creating an ATD</h3>
+<div class="step"><strong>Step 1:</strong> Navigate to <strong>Site Operations → ATD</strong>.</div>
+<div class="step"><strong>Step 2:</strong> Click <kbd>+ New ATD</kbd>.</div>
+<div class="step"><strong>Step 3:</strong> Search and select the employee. Set the weekly deduction amount and date range.</div>
+<div class="step"><strong>Step 4:</strong> Add deduction items (item name and amount). The total deduction is auto-calculated.</div>
+<div class="step"><strong>Step 5:</strong> Click <kbd>Save</kbd>.</div>
+
+<h3>16.2 Managing ATD Status</h3>
+<p>Update the ATD status as needed: Active → Completed → Cancelled.</p>
+
+<h3>16.3 Exporting ATDs</h3>
+<p>Click the <kbd>CSV</kbd> button to download ATD records.</p>
+</div>
+
+<!-- 17. Compliance -->
+<div class="page-break section" id="compliance">
+<h2>17. Compliance Calendar</h2>
+
+<h3>17.1 Viewing Tasks</h3>
+<p>Navigate to <strong>Compliance</strong> to see all compliance tasks. Use the filter buttons (All, Pending, Overdue, Completed) to narrow down the list.</p>
+
+<h3>17.2 Creating a Task</h3>
+<div class="step"><strong>Step 1:</strong> Click <kbd>+ New Task</kbd> (Admin/HRD only).</div>
+<div class="step"><strong>Step 2:</strong> Enter the title, description, select the module, set the due date and priority.</div>
+<div class="step"><strong>Step 3:</strong> Click <kbd>Save</kbd>.</div>
+
+<h3>17.3 Auto-Generated Tasks</h3>
+<p>Click <kbd>Auto-Generate</kbd> to create compliance tasks for expiring contracts and pending evaluations automatically. Tasks are color-coded by priority: Urgent (red), High (orange), Normal (blue).</p>
+
+<h3>17.4 Completing Tasks</h3>
+<p>Click the checkmark button next to any task to mark it as completed, or click <kbd>Mark Overdue</kbd> to update overdue tasks.</p>
+</div>
+
+<!-- 18. Document Vault -->
+<div class="page-break section" id="vault">
+<h2>18. Document Vault</h2>
+
+<h3>18.1 Uploading Documents</h3>
+<div class="step"><strong>Step 1:</strong> Navigate to <strong>Document Vault</strong>.</div>
+<div class="step"><strong>Step 2:</strong> Click <kbd>+ Upload Document</kbd>.</div>
+<div class="step"><strong>Step 3:</strong> Enter the title, select the document type (Policy, Form, Report, Contract, Other), choose a category, and optionally set a revision number and description.</div>
+<div class="step"><strong>Step 4:</strong> Select the file and click <kbd>Upload</kbd>.</div>
+
+<h3>18.2 Searching &amp; Filtering</h3>
+<p>Use the search bar and document type filter to find specific documents quickly.</p>
+
+<h3>18.3 Deleting Documents</h3>
+<p>Use the delete button to remove documents. This permanently deletes the file from the server.</p>
+</div>
+
+<!-- 19. Reports -->
+<div class="page-break section" id="reports">
+<h2>19. Reports</h2>
+
+<h3>19.1 Viewing Reports</h3>
+<p>Navigate to <strong>Reports</strong> to see summary statistics and charts including:</p>
+<ul>
+  <li>Cases by severity and status</li>
+  <li>Department-wise case distribution</li>
+  <li>Monthly case trends</li>
+  <li>Top offenses and their frequencies</li>
+  <li>Average case resolution time</li>
+</ul>
+
+<h3>19.2 Exporting Data</h3>
+<p>Use the export buttons to download CSV files:</p>
+<ul>
+  <li><strong>Disciplinary Cases</strong> — All case records</li>
+  <li><strong>Employees</strong> — All employee records</li>
+  <li><strong>Attendance</strong> — Attendance records</li>
+  <li><strong>Contracts</strong> — All contract records</li>
+  <li><strong>Full Export</strong> — Combined data from all modules</li>
+</ul>
+</div>
+
+<!-- 20. Audit Log -->
+<div class="page-break section" id="audit">
+<h2>20. Audit Log</h2>
+<p>The Audit Log captures every significant action performed in the system. Navigate to <strong>Audit Log</strong> to view the log.</p>
+
+<h3>20.1 Filtering Logs</h3>
+<ul>
+  <li><strong>Module filter</strong> — Select a specific module to view its entries</li>
+  <li><strong>Search</strong> — Search across all log fields</li>
+</ul>
+
+<h3>20.2 Clearing Old Logs</h3>
+<p>Click the <kbd>Clear</kbd> button to remove log entries older than 90 days (Admin/HRD only).</p>
+</div>
+
+<!-- 21. Troubleshooting -->
+<div class="page-break section" id="troubleshooting">
+<h2>21. Troubleshooting</h2>
+
+<h3>21.1 Cannot Log In</h3>
+<ul>
+  <li>Verify you are using the correct username and password</li>
+  <li>Check that Caps Lock is not enabled</li>
+  <li>Contact your administrator to reset your password</li>
+</ul>
+
+<h3>21.2 Page Not Loading</h3>
+<ul>
+  <li>Check your internet/network connection</li>
+  <li>Ensure the server is running (contact IT support)</li>
+  <li>Try clearing your browser cache and cookies</li>
+  <li>Try a different browser (Chrome or Edge recommended)</li>
+</ul>
+
+<h3>21.3 Data Not Saving</h3>
+<ul>
+  <li>Check that all required fields are filled in</li>
+  <li>Verify file sizes are within limits (10MB for documents, 30MB for vault)</li>
+  <li>Check the server's storage space</li>
+</ul>
+
+<h3>21.4 OCR Not Working</h3>
+<ul>
+  <li>Ensure the uploaded image is clear and legible</li>
+  <li>Handwritten text may have lower accuracy than printed text</li>
+  <li>Large files may take longer to process</li>
+</ul>
+
+<h3>21.5 Contact Support</h3>
+<p>For unresolved issues, contact the system administrator or IT support team.</p>
+</div>
+
+<footer>
+HRMS v2.0.0 &mdash; User Manual &mdash; L.V. Ledesma Construction, Inc. &mdash; June 2026
+</footer>
+
+</body>
+</html>

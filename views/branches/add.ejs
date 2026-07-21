@@ -1,0 +1,50 @@
+<div class="container-fluid px-4 py-4">
+<div class="d-flex justify-content-between align-items-center mb-4">
+<div>
+<h2 class="fw-bold mb-1"><i class="bi bi-plus-circle me-2"></i>Add Branch</h2>
+<p class="text-muted mb-0">Create a new company branch or project site</p>
+</div>
+<a href="/branches" class="btn btn-outline-secondary"><i class="bi bi-arrow-left"></i> Back</a>
+</div>
+
+<% if (typeof error !== 'undefined') { %>
+<div class="alert alert-danger"><%= error %></div>
+<% } %>
+
+<div class="card border-0 shadow-sm">
+<div class="card-body p-4">
+<form method="post" action="/branches/add">
+<div class="row g-3">
+<div class="col-md-6">
+<label class="form-label fw-medium">Branch Name <span class="text-danger">*</span></label>
+<input type="text" name="name" class="form-control" required value="<%= typeof form !== 'undefined' ? form.name : '' %>" placeholder="e.g. Vail Land Development">
+</div>
+<div class="col-md-3">
+<label class="form-label fw-medium">Branch Code <span class="text-danger">*</span></label>
+<input type="text" name="code" class="form-control" required value="<%= typeof form !== 'undefined' ? form.code : '' %>" placeholder="e.g. VLD" maxlength="10">
+</div>
+<div class="col-md-3">
+<label class="form-label fw-medium">Email</label>
+<input type="email" name="email" class="form-control" value="<%= typeof form !== 'undefined' ? form.email : '' %>">
+</div>
+<div class="col-12">
+<label class="form-label fw-medium">Address</label>
+<textarea name="address" class="form-control" rows="2"><%= typeof form !== 'undefined' ? form.address : '' %></textarea>
+</div>
+<div class="col-md-6">
+<label class="form-label fw-medium">Contact Person</label>
+<input type="text" name="contact_person" class="form-control" value="<%= typeof form !== 'undefined' ? form.contact_person : '' %>">
+</div>
+<div class="col-md-6">
+<label class="form-label fw-medium">Contact Number</label>
+<input type="text" name="contact_number" class="form-control" value="<%= typeof form !== 'undefined' ? form.contact_number : '' %>">
+</div>
+</div>
+<div class="mt-4">
+<button type="submit" class="btn btn-primary"><i class="bi bi-check-lg"></i> Create Branch</button>
+<a href="/branches" class="btn btn-outline-secondary ms-2">Cancel</a>
+</div>
+</form>
+</div>
+</div>
+</div>

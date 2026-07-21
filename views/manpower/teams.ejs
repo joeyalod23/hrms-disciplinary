@@ -1,0 +1,58 @@
+<div class="container-fluid px-4 py-4">
+  <div class="d-flex justify-content-between align-items-center mb-4">
+    <h4 class="fw-bold"><i class="bi bi-people-fill"></i> Teams by Position</h4>
+    <a href="/manpower" class="btn btn-outline-primary"><i class="bi bi-diagram-3"></i> Manpower Loading</a>
+  </div>
+
+  <div class="row g-2 mb-4">
+    <div class="col-md-3">
+      <div class="card border-0 shadow-sm bg-primary text-white text-center py-3">
+        <h3 class="mb-0"><%= total %></h3>
+        <small>Total Active</small>
+      </div>
+    </div>
+    <div class="col-md-3">
+      <div class="card border-0 shadow-sm bg-success text-white text-center py-3">
+        <h3 class="mb-0"><%= groups.length %></h3>
+        <small>Position Groups</small>
+      </div>
+    </div>
+  </div>
+
+  <div class="row g-3">
+    <% if (groups.length === 0) { %>
+      <div class="col-12"><p class="text-center text-muted py-4">No active employees found</p></div>
+    <% } else { %>
+      <% groups.forEach(function(g) { %>
+      <div class="col-md-4">
+        <div class="card border-0 shadow-sm h-100">
+          <div class="card-header bg-white py-2 d-flex justify-content-between align-items-center">
+            <h6 class="fw-bold mb-0"><%= g.position %></h6>
+            <span class="badge bg-primary rounded-pill"><%= g.count %></span>
+          </div>
+          <div class="card-body p-0">
+            <% if (g.employees.length === 0) { %>
+              <p class="text-muted text-center py-3 mb-0">No employees</p>
+            <% } else { %>
+              <table class="table table-sm table-hover mb-0">
+                <thead class="table-light">
+                  <tr><th>Name</th><th>ID</th><th>Dept</th></tr>
+                </thead>
+                <tbody>
+                  <% g.employees.forEach(function(e) { %>
+                  <tr>
+                    <td><a href="/employees/view/<%= e.id %>" class="text-decoration-none"><%= e.full_name %></a></td>
+                    <td><%= e.employee_id %></td>
+                    <td><%= e.department %></td>
+                  </tr>
+                  <% }); %>
+                </tbody>
+              </table>
+            <% } %>
+          </div>
+        </div>
+      </div>
+      <% }); %>
+    <% } %>
+  </div>
+</div>

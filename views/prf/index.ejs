@@ -1,0 +1,585 @@
+<script src="https://cdn.tailwindcss.com"></script>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+<script>
+  tailwind.config = {
+    theme: {
+      extend: {
+        colors: {
+          primary: { 50: '#eff6ff', 100: '#dbeafe', 200: '#bfdbfe', 300: '#93c5fd', 400: '#60a5fa', 500: '#3b82f6', 600: '#2563eb', 700: '#1d4ed8', 800: '#1e40af', 900: '#1e3a8a' }
+        }
+      }
+    }
+  }
+</script>
+<style>
+  @media print { .no-print { display: none !important; } }
+  .status-badge { @apply inline-block px-2.5 py-0.5 rounded-full text-xs font-semibold; }
+  .status-hired { @apply bg-green-100 text-green-800; }
+  .status-rehired { @apply bg-emerald-100 text-emerald-800; }
+  .status-processing { @apply bg-yellow-100 text-yellow-800; }
+  .status-waiting { @apply bg-orange-100 text-orange-800; }
+  .status-backout { @apply bg-red-100 text-red-800; }
+  .status-unreachable { @apply bg-gray-100 text-gray-800; }
+  .status-tradetest { @apply bg-purple-100 text-purple-800; }
+  /* .modal-overlay { @apply fixed inset-0 bg-black/50 flex items-center justify-center z-50; }
+  .modal-content { @apply bg-white rounded-xl shadow-2xl w-full max-w-lg mx-4 max-h-[90vh] overflow-y-auto; } */
+  .fade-in { animation: fadeIn 0.2s ease; }
+  @keyframes fadeIn { from { opacity: 0; transform: scale(0.95); } to { opacity: 1; transform: scale(1); } }
+  .chevron-icon { transition: transform 0.2s ease; }
+  .chevron-icon.rotate-90 { transform: rotate(90deg); }
+</style>
+
+<div class="prf-container" style="padding: 1.5rem 0;">
+  <!-- Loading -->
+  <div id="loading" class="text-center py-20">
+    <i class="fa-solid fa-spinner fa-spin text-3xl text-blue-500"></i>
+    <p class="mt-3 text-gray-500">Loading PRF data...</p>
+  </div>
+
+  <!-- Dashboard View -->
+  <div id="dashboardView" class="hidden">
+    <div class="flex items-center justify-between mb-4">
+      <h4 class="fw-bold text-gray-900"><i class="fa-solid fa-clipboard-list text-blue-600 me-2"></i>RANK AND FILE HIRING MONITORING 2026</h4>
+    </div>
+    <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-4 mb-4">
+      <div class="bg-white rounded-xl border border-gray-200 p-4 shadow-sm cursor-pointer hover:shadow-md transition" onclick="showDashboard()">
+        <p class="text-xs font-medium text-gray-500 uppercase tracking-wide">Projects</p>
+        <p class="text-2xl font-bold text-gray-900 mt-1" id="dashTotalProjects">0</p>
+      </div>
+      <div class="bg-white rounded-xl border border-gray-200 p-4 shadow-sm cursor-pointer hover:shadow-md transition" onclick="showAllApplicants()">
+        <p class="text-xs font-medium text-gray-500 uppercase tracking-wide">Total Applicants</p>
+        <p class="text-2xl font-bold text-indigo-600 mt-1" id="dashTotalApplicants">0</p>
+      </div>
+      <div class="bg-white rounded-xl border border-gray-200 p-4 shadow-sm cursor-pointer hover:shadow-md transition" onclick="showHiredReport()">
+        <p class="text-xs font-medium text-gray-500 uppercase tracking-wide">Total Hired</p>
+        <p class="text-2xl font-bold text-green-600 mt-1" id="dashTotalHired">0</p>
+      </div>
+      <div class="bg-white rounded-xl border border-gray-200 p-4 shadow-sm cursor-pointer hover:shadow-md transition" onclick="showRequestedReport()">
+        <p class="text-xs font-medium text-gray-500 uppercase tracking-wide">Total Requested</p>
+        <p class="text-2xl font-bold text-blue-600 mt-1" id="dashTotalRequested">0</p>
+      </div>
+      <div class="bg-white rounded-xl border border-gray-200 p-4 shadow-sm cursor-pointer hover:shadow-md transition" onclick="showRemainingReport()">
+        <p class="text-xs font-medium text-gray-500 uppercase tracking-wide">Remaining Needed</p>
+        <p class="text-2xl font-bold text-amber-600 mt-1" id="dashTotalRemaining">0</p>
+      </div>
+    </div>
+    <!-- Inline Report Section -->
+    <div id="dashReport" class="hidden bg-white rounded-xl border border-gray-200 shadow-sm mb-4">
+      <div class="px-5 py-4 border-b border-gray-100 flex items-center justify-between">
+        <h2 class="text-sm font-semibold text-gray-700 uppercase tracking-wide" id="dashReportTitle">Report</h2>
+        <button onclick="hideReport()" class="text-gray-400 hover:text-gray-600 text-lg leading-none">&times;</button>
+      </div>
+      <div id="dashReportBody" class="p-4"></div>
+    </div>
+    <div class="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden">
+      <div class="px-5 py-4 border-b border-gray-100 flex items-center justify-between">
+        <h2 class="text-sm font-semibold text-gray-700 uppercase tracking-wide">Project Sites</h2>
+        <span class="text-xs text-gray-400">Click a project to drill down</span>
+      </div>
+      <div class="overflow-x-auto">
+        <table class="min-w-full divide-y divide-gray-200 text-sm">
+          <thead class="bg-gray-50">
+            <tr>
+              <th class="px-4 py-3 text-left font-medium text-gray-500 uppercase text-xs">Project Site</th>
+              <th class="px-4 py-3 text-center font-medium text-gray-500 uppercase text-xs">Location</th>
+              <th class="px-4 py-3 text-center font-medium text-gray-500 uppercase text-xs">Requested</th>
+              <th class="px-4 py-3 text-center font-medium text-gray-500 uppercase text-xs">Hired</th>
+              <th class="px-4 py-3 text-center font-medium text-gray-500 uppercase text-xs">Pending</th>
+              <th class="px-4 py-3 text-center font-medium text-gray-500 uppercase text-xs">Remaining</th>
+            </tr>
+          </thead>
+          <tbody class="divide-y divide-gray-100" id="dashProjectRows"></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- Project View -->
+  <div id="projectView" class="hidden">
+    <div class="flex items-center justify-between mb-4">
+      <div>
+        <button onclick="showDashboard()" class="text-sm text-blue-600 hover:text-blue-800 font-medium">
+          <i class="fa-solid fa-arrow-left mr-1"></i> Back to Dashboard
+        </button>
+        <h2 class="text-xl font-bold text-gray-900 mt-1" id="projectViewTitle">Project</h2>
+        <p class="text-sm text-gray-500" id="projectViewLocation"></p>
+      </div>
+      <div class="flex gap-2">
+        <button onclick="openAddPrfModal()" class="bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium px-4 py-2 rounded-lg shadow-sm transition">
+          <i class="fa-solid fa-plus mr-1"></i> New PRF
+        </button>
+        <button onclick="openAddApplicantModal()" class="bg-emerald-600 hover:bg-emerald-700 text-white text-sm font-medium px-4 py-2 rounded-lg shadow-sm transition">
+          <i class="fa-solid fa-user-plus mr-1"></i> Add Applicant
+        </button>
+      </div>
+    </div>
+    <div class="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden">
+      <div class="px-4 py-3 bg-gray-50 border-b border-gray-200 flex items-center justify-between cursor-pointer" onclick="togglePrfSummary(this)">
+        <div>
+          <i class="fa-solid fa-chevron-right chevron-icon mr-2 text-gray-400"></i>
+          <span class="font-semibold text-gray-800">PRF Summary</span>
+        </div>
+        <span class="text-xs text-gray-400">Click to expand</span>
+      </div>
+      <div class="hidden overflow-x-auto prf-summary-body">
+        <table class="min-w-full divide-y divide-gray-200 text-sm">
+          <thead class="bg-gray-50">
+            <tr>
+              <th class="px-3 py-3 text-left font-medium text-gray-500 uppercase text-xs">PRF No.</th>
+              <th class="px-3 py-3 text-left font-medium text-gray-500 uppercase text-xs">Trade / Position</th>
+              <th class="px-3 py-3 text-center font-medium text-gray-500 uppercase text-xs">Req</th>
+              <th class="px-3 py-3 text-center font-medium text-gray-500 uppercase text-xs">Apps</th>
+              <th class="px-3 py-3 text-center font-medium text-gray-500 uppercase text-xs">Qual</th>
+              <th class="px-3 py-3 text-center font-medium text-gray-500 uppercase text-xs">Hired</th>
+              <th class="px-3 py-3 text-center font-medium text-gray-500 uppercase text-xs">Pending</th>
+              <th class="px-3 py-3 text-center font-medium text-gray-500 uppercase text-xs">Open</th>
+              <th class="px-3 py-3 text-center font-medium text-gray-500 uppercase text-xs no-print">Act</th>
+            </tr>
+          </thead>
+          <tbody class="divide-y divide-gray-100" id="prfSummaryRows"></tbody>
+        </table>
+      </div>
+    </div>
+    <div id="applicantSections" class="mt-6 space-y-4"></div>
+  </div>
+</div>
+
+<!-- Modals -->
+<div id="prfModal" class="hidden fade-in" style="position:fixed;bottom:24px;right:24px;z-index:999;width:420px;max-width:calc(100vw - 48px);">
+  <div class="bg-white rounded-xl shadow-2xl border border-gray-200 p-5">
+    <div class="flex items-center justify-between mb-4">
+      <h3 class="text-lg font-bold text-gray-900" id="prfModalTitle">New PRF Request</h3>
+      <button onclick="closeModal('prfModal')" class="text-gray-400 hover:text-gray-600 text-xl leading-none">&times;</button>
+    </div>
+    <form id="prfForm" onsubmit="savePrf(event)" class="space-y-4">
+      <input type="hidden" id="prfId" value="" />
+      <div>
+        <label class="block text-sm font-medium text-gray-700 mb-1">PRF Number</label>
+        <input type="text" id="prfNo" required placeholder="e.g. VAIL-RES-26-004A" class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none" />
+      </div>
+      <div>
+        <label class="block text-sm font-medium text-gray-700 mb-1">Trade / Position</label>
+        <input type="text" id="prfTrade" required placeholder="e.g. MASON/CARPENTER" class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none" />
+      </div>
+      <div>
+        <label class="block text-sm font-medium text-gray-700 mb-1">Total Manpower Requested</label>
+        <input type="number" id="prfTotal" required min="1" class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none" />
+      </div>
+      <div class="flex justify-end pt-2">
+        <button type="submit" class="px-5 py-2 text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 rounded-lg transition">Save PRF</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<div id="applicantModal" class="hidden fade-in" style="position:fixed;bottom:24px;right:24px;z-index:999;width:420px;max-width:calc(100vw - 48px);">
+  <div class="bg-white rounded-xl shadow-2xl border border-gray-200 p-5">
+    <div class="flex items-center justify-between mb-4">
+      <h3 class="text-lg font-bold text-gray-900" id="applicantModalTitle">Add Applicant</h3>
+      <button onclick="closeModal('applicantModal')" class="text-gray-400 hover:text-gray-600 text-xl leading-none">&times;</button>
+    </div>
+    <form id="applicantForm" onsubmit="saveApplicant(event)" class="space-y-4">
+      <input type="hidden" id="applicantId" value="" />
+      <input type="hidden" id="applicantPrfId" value="" />
+      <div>
+        <label class="block text-sm font-medium text-gray-700 mb-1">PRF Request</label>
+        <select id="applicantPrfSelect" required class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"></select>
+      </div>
+      <div>
+        <label class="block text-sm font-medium text-gray-700 mb-1">Applicant Name</label>
+        <input type="text" id="applicantName" required placeholder="Full name" class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none" />
+      </div>
+      <div>
+        <label class="block text-sm font-medium text-gray-700 mb-1">Sourced From</label>
+        <select id="applicantSource" required class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none">
+          <option value="">-- Select --</option>
+          <option value="WALK IN">WALK IN</option>
+          <option value="PESO CDO">PESO CDO</option>
+          <option value="REFERRAL">REFERRAL</option>
+          <option value="ONLINE POSTING">ONLINE POSTING</option>
+          <option value="AGENCY">AGENCY</option>
+        </select>
+      </div>
+      <div>
+        <label class="block text-sm font-medium text-gray-700 mb-1">Recruitment Status</label>
+        <input type="text" id="applicantStatus" required list="statusSuggestions" placeholder="e.g. HIRED, PROCESSING DOCUMENTS, BACK OUT, ..." class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none" />
+        <datalist id="statusSuggestions">
+          <option value="HIRED"><option value="RE-HIRED"><option value="PROCESSING DOCUMENTS"><option value="PROCESSING DOCS"><option value="WAITING FOR JOB OFFER APPROVAL"><option value="WAITING FOR ON BOARD"><option value="FOR TRADETEST"><option value="FOR TRADETEST/PROCESSING DOCS"><option value="ON GOING PROCESS OF DOCS"><option value="BACK OUT"><option value="BACK OUT AFTER INTERVIEW"><option value="CANNOT BE REACH"><option value="DIDNT ANSWER CALL/DIDNT REPLY TEXT">
+        </datalist>
+      </div>
+      <div>
+        <label class="block text-sm font-medium text-gray-700 mb-1">Remarks</label>
+        <textarea id="applicantRemarks" rows="2" placeholder="Optional notes" class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"></textarea>
+      </div>
+      <div class="flex justify-end pt-2">
+        <button type="submit" class="px-5 py-2 text-sm font-medium text-white bg-emerald-600 hover:bg-emerald-700 rounded-lg transition">Save Applicant</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+
+
+<script>
+  document.title = 'RANK AND FILE HIRING MONITORING 2026';
+  const API = '/prf/api';
+  let currentProjectId = null;
+  let dashboardData = null;
+  let cachedPrfs = [];
+
+  function $(id) { return document.getElementById(id); }
+
+  function statusClass(status) {
+    const s = (status || '').toUpperCase();
+    if (s.includes('HIRED')) return 'status-hired';
+    if (s.includes('PROCESSING') || s.includes('ON GOING')) return 'status-processing';
+    if (s.includes('WAITING FOR')) return 'status-waiting';
+    if (s.includes('FOR TRADETEST')) return 'status-tradetest';
+    if (s.includes('BACK OUT')) return 'status-backout';
+    if (s.includes('CANNOT') || s.includes('DIDNT') || s.includes('NOT SURE') || s.includes('NO REPLY') || s.includes('NO ANSWER')) return 'status-unreachable';
+    return 'bg-gray-100 text-gray-800';
+  }
+  function statusIcon(status) {
+    const s = (status || '').toUpperCase();
+    if (s.includes('HIRED')) return 'fa-check-circle';
+    if (s.includes('PROCESSING') || s.includes('ON GOING')) return 'fa-file-pen';
+    if (s.includes('WAITING FOR')) return 'fa-clock';
+    if (s.includes('FOR TRADETEST')) return 'fa-flask';
+    if (s.includes('BACK OUT')) return 'fa-person-walking-dashed-line-arrow-right';
+    if (s.includes('CANNOT') || s.includes('DIDNT') || s.includes('NOT SURE')) return 'fa-phone-slash';
+    return 'fa-circle';
+  }
+  function showToast(msg, type) {
+    type = type || 'success';
+    const colors = { success: 'bg-green-600', error: 'bg-red-600', info: 'bg-blue-600' };
+    const el = document.createElement('div');
+    el.className = `fixed top-4 right-4 z-50 ${colors[type]} text-white px-5 py-3 rounded-lg shadow-lg text-sm font-medium transition-all duration-300`;
+    el.textContent = msg;
+    document.body.appendChild(el);
+    setTimeout(() => { el.style.opacity = '0'; setTimeout(() => el.remove(), 300); }, 3000);
+  }
+  function closeModal(id) { document.getElementById(id).classList.add('hidden'); }
+  function openModal(id) { document.getElementById(id).classList.remove('hidden'); }
+
+  async function apiFetch(url, opts) {
+    opts = opts || {};
+    const res = await fetch(API + url, {
+      headers: { 'Content-Type': 'application/json', ...opts.headers },
+      ...opts,
+    });
+    if (!res.ok) {
+      const body = await res.json().catch(() => ({ detail: res.statusText }));
+      throw new Error(body.detail || 'HTTP ' + res.status);
+    }
+    if (res.status === 204) return null;
+    return res.json();
+  }
+
+  function esc(s) { var d = document.createElement('div'); d.textContent = s; return d.innerHTML; }
+
+  // ── Dashboard ──────────────────────────────────────────────────────────
+  async function showDashboard() {
+    $('dashboardView').classList.remove('hidden');
+    $('projectView').classList.add('hidden');
+    $('loading').classList.remove('hidden');
+    $('dashboardView').classList.add('hidden');
+    try {
+      var data = await apiFetch('/dashboard');
+      dashboardData = data;
+      renderDashboard(data);
+      $('loading').classList.add('hidden');
+      $('dashboardView').classList.remove('hidden');
+    } catch (e) {
+      $('loading').innerHTML = '<i class="fa-solid fa-triangle-exclamation text-3xl text-red-500"></i><p class="mt-3 text-red-600">Failed: ' + e.message + '</p><button onclick="showDashboard()" class="mt-4 px-4 py-2 bg-blue-600 text-white rounded-lg text-sm">Retry</button>';
+    }
+  }
+
+  function renderDashboard(data) {
+    $('dashTotalProjects').textContent = data.total_projects;
+    $('dashTotalRequested').textContent = data.total_manpower_requested;
+    $('dashTotalHired').textContent = data.total_hired;
+    $('dashTotalRemaining').textContent = data.total_remaining;
+    $('dashTotalApplicants').textContent = data.total_applicants;
+    var tbody = $('dashProjectRows');
+    tbody.innerHTML = '';
+    for (var i = 0; i < data.projects.length; i++) {
+      var proj = data.projects[i];
+      var tr = document.createElement('tr');
+      tr.className = 'hover:bg-blue-50 cursor-pointer transition';
+      tr.innerHTML = '<td class="px-4 py-3 font-medium text-gray-900">' + esc(proj.project_name) + '</td><td class="px-4 py-3 text-center text-gray-500">' + esc(proj.location) + '</td><td class="px-4 py-3 text-center font-semibold">' + proj.total_requested + '</td><td class="px-4 py-3 text-center text-green-700 font-semibold">' + proj.total_hired + '</td><td class="px-4 py-3 text-center text-yellow-600 font-semibold">' + proj.total_pending + '</td><td class="px-4 py-3 text-center ' + (proj.remaining_needed <= 0 ? 'text-green-600 font-bold' : 'text-amber-600') + '">' + proj.remaining_needed + '</td>';
+      tr.addEventListener('click', (function(id) { return function() { showProject(id); }; })(proj.id));
+      tbody.appendChild(tr);
+    }
+  }
+
+  // ── Project View ───────────────────────────────────────────────────────
+  async function showProject(projectId) {
+    currentProjectId = projectId;
+    $('dashboardView').classList.add('hidden');
+    $('projectView').classList.remove('hidden');
+    $('loading').classList.remove('hidden');
+    $('projectView').classList.add('hidden');
+    try {
+      var dash = await apiFetch('/dashboard');
+      var prfs = await apiFetch('/prfs?project_id=' + projectId);
+      cachedPrfs = prfs;
+      var proj = null;
+      for (var i = 0; i < dash.projects.length; i++) { if (dash.projects[i].id === projectId) { proj = dash.projects[i]; break; } }
+      if (!proj) throw new Error('Project not found');
+      $('projectViewTitle').textContent = proj.project_name;
+      $('projectViewLocation').textContent = proj.location;
+      renderPrfSummaryRows(prfs);
+      await renderApplicantSections(prfs);
+      $('loading').classList.add('hidden');
+      $('projectView').classList.remove('hidden');
+    } catch (e) {
+      $('loading').innerHTML = '<i class="fa-solid fa-triangle-exclamation text-3xl text-red-500"></i><p class="mt-3 text-red-600">Failed: ' + e.message + '</p><button onclick="showProject(' + projectId + ')" class="mt-4 px-4 py-2 bg-blue-600 text-white rounded-lg text-sm">Retry</button>';
+    }
+  }
+
+  function renderPrfSummaryRows(prfs) {
+    var tbody = $('prfSummaryRows');
+    tbody.innerHTML = '';
+    for (var i = 0; i < prfs.length; i++) {
+      var p = prfs[i];
+      var rem = p.total_manpower_requested - p.total_hired;
+      var tr = document.createElement('tr');
+      tr.className = 'hover:bg-gray-50 cursor-pointer';
+      tr.innerHTML = '<td class="px-3 py-3 font-mono text-xs text-blue-700 font-medium">' + esc(p.prf_no) + '</td><td class="px-3 py-3 font-medium">' + esc(p.trade_position) + '</td><td class="px-3 py-3 text-center font-semibold">' + p.total_manpower_requested + '</td><td class="px-3 py-3 text-center">' + p.total_applicants + '</td><td class="px-3 py-3 text-center text-blue-700 font-medium">' + p.total_qualified + '</td><td class="px-3 py-3 text-center text-green-700 font-semibold">' + p.total_hired + '</td><td class="px-3 py-3 text-center text-yellow-600">' + p.total_pending + '</td><td class="px-3 py-3 text-center ' + (rem <= 0 ? 'text-green-600 font-bold' : 'text-amber-600') + '">' + rem + '</td><td class="px-3 py-3 text-center no-print"><button onclick="event.stopPropagation();editPrf(' + p.id + ')" class="text-blue-500 hover:text-blue-700 mx-1"><i class="fa-solid fa-pen-to-square"></i></button><button onclick="event.stopPropagation();deletePrf(' + p.id + ')" class="text-red-500 hover:text-red-700 mx-1"><i class="fa-solid fa-trash-can"></i></button></td>';
+      tr.addEventListener('click', (function(id) { return function() { window.location.href = '/prf/view/' + id; }; })(p.id));
+      tbody.appendChild(tr);
+    }
+    if (!prfs.length) { tbody.innerHTML = '<tr><td colspan="9" class="text-center py-8 text-gray-400">No PRF requests for this project.</td></tr>'; }
+  }
+
+  function togglePrfSummary(header) {
+    var body = header.nextElementSibling;
+    var chevron = header.querySelector('.chevron-icon');
+    body.classList.toggle('hidden');
+    chevron.classList.toggle('rotate-90');
+  }
+
+  async function renderApplicantSections(prfs) {
+    var container = $('applicantSections');
+    container.innerHTML = '';
+    for (var i = 0; i < prfs.length; i++) {
+      var prf = prfs[i];
+      var section = document.createElement('div');
+      section.className = 'bg-white rounded-xl border border-gray-200 shadow-sm mb-3 cursor-pointer hover:shadow-md transition';
+      section.onclick = function(id) { return function() { window.location.href = '/prf/view/' + id; }; }(prf.id);
+      var rem = prf.total_manpower_requested - prf.total_hired;
+      section.innerHTML = '<div class="px-4 py-3 flex items-center justify-between"><div class="flex items-center gap-3"><span class="font-mono text-xs text-blue-700 font-semibold bg-blue-50 px-2 py-1 rounded">' + esc(prf.prf_no) + '</span><span class="font-semibold text-gray-800">' + esc(prf.trade_position) + '</span><span class="text-gray-400 text-xs">' + prf.total_applicants + ' applicants</span></div><div class="flex items-center gap-3"><span class="text-xs text-green-700 font-medium">' + prf.total_hired + ' hired</span><span class="text-xs ' + (rem <= 0 ? 'text-green-600' : 'text-amber-600') + ' font-medium">' + rem + ' open</span><i class="fa-solid fa-chevron-right text-gray-300 text-xs"></i></div></div>';
+      container.appendChild(section);
+    }
+    if (!prfs.length) { container.innerHTML = '<div class="text-center py-8 text-gray-400">No PRF requests for this project.</div>'; }
+  }
+
+  function buildApplicantRow(a) {
+    return '<tr class="hover:bg-gray-50"><td class="px-3 py-2 font-medium text-gray-800">' + esc(a.applicant_name) + '</td><td class="px-3 py-2 text-gray-500">' + esc(a.sourced_from) + '</td><td class="px-3 py-2"><span class="status-badge ' + statusClass(a.recruitment_status) + '"><i class="fa-solid ' + statusIcon(a.recruitment_status) + ' mr-1"></i>' + esc(a.recruitment_status) + '</span></td><td class="px-3 py-2 text-gray-500 max-w-[200px] truncate">' + esc(a.remarks || '') + '</td><td class="px-3 py-2 text-center no-print"><button onclick="editApplicant(' + a.id + ')" class="text-blue-500 hover:text-blue-700 mx-1"><i class="fa-solid fa-pen-to-square"></i></button><button onclick="deleteApplicant(' + a.id + ')" class="text-red-500 hover:text-red-700 mx-1"><i class="fa-solid fa-trash-can"></i></button></td></tr>';
+  }
+
+  // ── CRUD ───────────────────────────────────────────────────────────────
+  function openAddPrfModal(prf) {
+    $('prfForm').reset();
+    $('prfId').value = '';
+    if (prf) {
+      $('prfModalTitle').textContent = 'Edit PRF Request';
+      $('prfId').value = prf.id;
+      $('prfNo').value = prf.prf_no;
+      $('prfTrade').value = prf.trade_position;
+      $('prfTotal').value = prf.total_manpower_requested;
+    } else {
+      $('prfModalTitle').textContent = 'New PRF Request';
+    }
+    openModal('prfModal');
+  }
+  async function savePrf(e) {
+    e.preventDefault();
+    var prfId = $('prfId').value;
+    var payload = { prf_no: $('prfNo').value.trim().toUpperCase(), trade_position: $('prfTrade').value.trim().toUpperCase(), total_manpower_requested: parseInt($('prfTotal').value), project_id: currentProjectId };
+    try {
+      if (prfId) { await apiFetch('/prfs/' + prfId, { method: 'PATCH', body: JSON.stringify(payload) }); showToast('PRF updated'); }
+      else { await apiFetch('/prfs', { method: 'POST', body: JSON.stringify(payload) }); showToast('PRF created'); }
+      closeModal('prfModal');
+      showProject(currentProjectId);
+    } catch (e) { showToast(e.message, 'error'); }
+  }
+  async function editPrf(prfId) {
+    var prfs = cachedPrfs;
+    var prf = null;
+    for (var i = 0; i < prfs.length; i++) { if (prfs[i].id === prfId) { prf = prfs[i]; break; } }
+    if (!prf) return showToast('PRF not found', 'error');
+    openAddPrfModal(prf);
+  }
+  async function deletePrf(prfId) {
+    if (!confirm('Delete this PRF and all its applicants?')) return;
+    try { await apiFetch('/prfs/' + prfId, { method: 'DELETE' }); showToast('PRF deleted'); showProject(currentProjectId); } catch (e) { showToast(e.message, 'error'); }
+  }
+
+  async function openAddApplicantModal(preSelectedPrfId) {
+    $('applicantModalTitle').textContent = 'Add Applicant';
+    $('applicantForm').reset();
+    $('applicantId').value = '';
+    var select = $('applicantPrfSelect');
+    var prfs = await apiFetch('/prfs?project_id=' + currentProjectId);
+    select.innerHTML = prfs.map(function(p) { return '<option value="' + p.id + '" ' + (p.id === preSelectedPrfId ? 'selected' : '') + '>' + esc(p.prf_no) + ' — ' + esc(p.trade_position) + '</option>'; }).join('');
+    $('applicantPrfId').value = preSelectedPrfId || '';
+    openModal('applicantModal');
+  }
+  async function saveApplicant(e) {
+    e.preventDefault();
+    var applicantId = $('applicantId').value;
+    var payload = { prf_request_id: parseInt($('applicantPrfSelect').value), applicant_name: $('applicantName').value.trim().toUpperCase(), sourced_from: $('applicantSource').value, recruitment_status: $('applicantStatus').value, remarks: $('applicantRemarks').value.trim() };
+    try {
+      if (applicantId) { await apiFetch('/applicants/' + applicantId, { method: 'PATCH', body: JSON.stringify(payload) }); showToast('Applicant updated'); }
+      else { await apiFetch('/applicants', { method: 'POST', body: JSON.stringify(payload) }); showToast('Applicant added'); }
+      closeModal('applicantModal');
+      showProject(currentProjectId);
+    } catch (e) { showToast(e.message, 'error'); }
+  }
+  async function editApplicant(applicantId) {
+    try {
+      var allApplicants = [];
+      for (var i = 0; i < cachedPrfs.length; i++) { var apps = await apiFetch('/applicants?prf_id=' + cachedPrfs[i].id); allApplicants = allApplicants.concat(apps); }
+      var app = null;
+      for (var i = 0; i < allApplicants.length; i++) { if (allApplicants[i].id === applicantId) { app = allApplicants[i]; break; } }
+      if (!app) throw new Error('Applicant not found');
+      $('applicantModalTitle').textContent = 'Edit Applicant';
+      $('applicantId').value = app.id;
+      var select = $('applicantPrfSelect');
+      var prfs = await apiFetch('/prfs?project_id=' + currentProjectId);
+      select.innerHTML = prfs.map(function(p) { return '<option value="' + p.id + '" ' + (p.id === app.prf_request_id ? 'selected' : '') + '>' + esc(p.prf_no) + ' — ' + esc(p.trade_position) + '</option>'; }).join('');
+      $('applicantName').value = app.applicant_name;
+      $('applicantSource').value = app.sourced_from;
+      $('applicantStatus').value = app.recruitment_status;
+      $('applicantRemarks').value = app.remarks || '';
+      openModal('applicantModal');
+    } catch (e) { showToast(e.message, 'error'); }
+  }
+  async function deleteApplicant(applicantId) {
+    if (!confirm('Delete this applicant?')) return;
+    try { await apiFetch('/applicants/' + applicantId, { method: 'DELETE' }); showToast('Applicant deleted'); showProject(currentProjectId); } catch (e) { showToast(e.message, 'error'); }
+  }
+
+  // ── Inline Report ────────────────────────────────────────────────────────
+  function hideReport() { $('dashReport').classList.add('hidden'); }
+  function showReport(title, bodyHtml) {
+    $('dashReportTitle').textContent = title;
+    $('dashReportBody').innerHTML = bodyHtml;
+    $('dashReport').classList.remove('hidden');
+  }
+  async function showHiredReport() {
+    showReport('Loading...', '<div class="text-center py-8 text-gray-400"><i class="fa-solid fa-spinner fa-spin text-2xl"></i><p class="mt-2">Loading hired applicants...</p></div>');
+    try {
+      var hired = await apiFetch('/hired');
+      if (!hired.length) {
+        showReport('Total Hired Report', '<div class="text-center py-8 text-gray-400"><i class="fa-solid fa-user-slash text-3xl"></i><p class="mt-4">No hired applicants yet.</p></div>');
+        return;
+      }
+      var html = '<div class="mb-3 text-sm text-gray-500">' + hired.length + ' hired applicant(s)</div>';
+      html += '<div class="overflow-x-auto"><table class="min-w-full divide-y divide-gray-200 text-sm"><thead class="bg-gray-50"><tr>';
+      html += '<th class="px-3 py-3 text-left font-medium text-gray-500 uppercase text-xs">Name</th>';
+      html += '<th class="px-3 py-3 text-left font-medium text-gray-500 uppercase text-xs">Project</th>';
+      html += '<th class="px-3 py-3 text-left font-medium text-gray-500 uppercase text-xs">Position</th>';
+      html += '<th class="px-3 py-3 text-left font-medium text-gray-500 uppercase text-xs">PRF No.</th>';
+      html += '<th class="px-3 py-3 text-left font-medium text-gray-500 uppercase text-xs">Status</th>';
+      html += '<th class="px-3 py-3 text-left font-medium text-gray-500 uppercase text-xs">Source</th>';
+      html += '<th class="px-3 py-3 text-left font-medium text-gray-500 uppercase text-xs">Remarks</th>';
+      html += '</tr></thead><tbody class="divide-y divide-gray-100">';
+      for (var i = 0; i < hired.length; i++) {
+        var a = hired[i];
+        html += '<tr class="hover:bg-gray-50"><td class="px-3 py-2 font-medium text-gray-800">' + esc(a.applicant_name) + '</td>';
+        html += '<td class="px-3 py-2 text-gray-500">' + esc(a.project_name) + '</td>';
+        html += '<td class="px-3 py-2 text-gray-500">' + esc(a.trade_position) + '</td>';
+        html += '<td class="px-3 py-2 font-mono text-xs text-blue-700">' + esc(a.prf_no) + '</td>';
+        html += '<td class="px-3 py-2"><span class="status-badge status-hired"><i class="fa-solid fa-check-circle mr-1"></i>' + esc(a.recruitment_status) + '</span></td>';
+        html += '<td class="px-3 py-2 text-gray-500">' + esc(a.sourced_from) + '</td>';
+        html += '<td class="px-3 py-2 text-gray-400 max-w-[150px] truncate">' + esc(a.remarks || '') + '</td></tr>';
+      }
+      html += '</tbody></table></div>';
+      showReport('Total Hired Report', html);
+    } catch (e) {
+      showReport('Error', '<div class="text-center py-8 text-red-500"><i class="fa-solid fa-triangle-exclamation text-3xl"></i><p class="mt-3">' + esc(e.message) + '</p></div>');
+    }
+  }
+
+  async function showAllApplicants() {
+    showReport('Loading...', '<div class="text-center py-8 text-gray-400"><i class="fa-solid fa-spinner fa-spin text-2xl"></i><p class="mt-2">Loading all applicants...</p></div>');
+    try {
+      var all = await apiFetch('/applicants');
+      if (!all.length) {
+        showReport('Total Number of Applicants', '<div class="text-center py-8 text-gray-400"><i class="fa-solid fa-user-slash text-3xl"></i><p class="mt-4">No applicants yet.</p></div>');
+        return;
+      }
+      var html = '<div class="mb-3 text-sm text-gray-500">' + all.length + ' total applicant(s)</div>';
+      html += '<div class="overflow-x-auto"><table class="min-w-full divide-y divide-gray-200 text-sm"><thead class="bg-gray-50"><tr>';
+      html += '<th class="px-3 py-3 text-left font-medium text-gray-500 uppercase text-xs">Name</th>';
+      html += '<th class="px-3 py-3 text-left font-medium text-gray-500 uppercase text-xs">Project</th>';
+      html += '<th class="px-3 py-3 text-left font-medium text-gray-500 uppercase text-xs">Position</th>';
+      html += '<th class="px-3 py-3 text-left font-medium text-gray-500 uppercase text-xs">PRF No.</th>';
+      html += '<th class="px-3 py-3 text-left font-medium text-gray-500 uppercase text-xs">Status</th>';
+      html += '<th class="px-3 py-3 text-left font-medium text-gray-500 uppercase text-xs">Source</th>';
+      html += '<th class="px-3 py-3 text-left font-medium text-gray-500 uppercase text-xs">Remarks</th>';
+      html += '</tr></thead><tbody class="divide-y divide-gray-100">';
+      for (var i = 0; i < all.length; i++) {
+        var a = all[i];
+        html += '<tr class="hover:bg-gray-50"><td class="px-3 py-2 font-medium text-gray-800">' + esc(a.applicant_name) + '</td>';
+        html += '<td class="px-3 py-2 text-gray-500">' + esc(a.project_name || '') + '</td>';
+        html += '<td class="px-3 py-2 text-gray-500">' + esc(a.trade_position || '') + '</td>';
+        html += '<td class="px-3 py-2 font-mono text-xs text-blue-700">' + esc(a.prf_no || '') + '</td>';
+        html += '<td class="px-3 py-2"><span class="status-badge ' + statusClass(a.recruitment_status) + '"><i class="fa-solid ' + statusIcon(a.recruitment_status) + ' mr-1"></i>' + esc(a.recruitment_status) + '</span></td>';
+        html += '<td class="px-3 py-2 text-gray-500">' + esc(a.sourced_from) + '</td>';
+        html += '<td class="px-3 py-2 text-gray-400 max-w-[150px] truncate">' + esc(a.remarks || '') + '</td></tr>';
+      }
+      html += '</tbody></table></div>';
+      showReport('Total Number of Applicants', html);
+    } catch (e) {
+      showReport('Error', '<div class="text-center py-8 text-red-500"><i class="fa-solid fa-triangle-exclamation text-3xl"></i><p class="mt-3">' + esc(e.message) + '</p></div>');
+    }
+  }
+  function showRequestedReport() {
+    if (!dashboardData) { showReport('Total Requested', '<div class="text-center py-8 text-gray-400">Dashboard data not loaded yet.</div>'); return; }
+    var html = '<div class="mb-3 text-sm text-gray-500">' + dashboardData.total_manpower_requested + ' total positions requested across ' + dashboardData.total_projects + ' project(s)</div>';
+    html += '<div class="overflow-x-auto"><table class="min-w-full divide-y divide-gray-200 text-sm"><thead class="bg-gray-50"><tr>';
+    html += '<th class="px-3 py-3 text-left font-medium text-gray-500 uppercase text-xs">Project</th>';
+    html += '<th class="px-3 py-3 text-center font-medium text-gray-500 uppercase text-xs">Requested</th>';
+    html += '<th class="px-3 py-3 text-center font-medium text-gray-500 uppercase text-xs">Hired</th>';
+    html += '<th class="px-3 py-3 text-center font-medium text-gray-500 uppercase text-xs">Pending</th>';
+    html += '<th class="px-3 py-3 text-center font-medium text-gray-500 uppercase text-xs">Remaining</th>';
+    html += '</tr></thead><tbody class="divide-y divide-gray-100">';
+    for (var i = 0; i < dashboardData.projects.length; i++) {
+      var p = dashboardData.projects[i];
+      var rem = p.total_requested - p.total_hired;
+      html += '<tr class="hover:bg-gray-50"><td class="px-3 py-2 font-medium text-gray-800">' + esc(p.project_name) + '</td>';
+      html += '<td class="px-3 py-2 text-center font-semibold">' + p.total_requested + '</td>';
+      html += '<td class="px-3 py-2 text-center text-green-700 font-semibold">' + p.total_hired + '</td>';
+      html += '<td class="px-3 py-2 text-center text-yellow-600">' + p.total_pending + '</td>';
+      html += '<td class="px-3 py-2 text-center ' + (rem <= 0 ? 'text-green-600 font-bold' : 'text-amber-600') + '">' + rem + '</td></tr>';
+    }
+    html += '</tbody></table></div>';
+    showReport('Total Requested Report', html);
+  }
+  function showRemainingReport() {
+    if (!dashboardData) { showReport('Remaining Needed', '<div class="text-center py-8 text-gray-400">Dashboard data not loaded yet.</div>'); return; }
+    var html = '<div class="mb-3 text-sm text-gray-500">' + dashboardData.total_remaining + ' positions still needed</div>';
+    html += '<div class="overflow-x-auto"><table class="min-w-full divide-y divide-gray-200 text-sm"><thead class="bg-gray-50"><tr>';
+    html += '<th class="px-3 py-3 text-left font-medium text-gray-500 uppercase text-xs">Project</th>';
+    html += '<th class="px-3 py-3 text-center font-medium text-gray-500 uppercase text-xs">Requested</th>';
+    html += '<th class="px-3 py-3 text-center font-medium text-gray-500 uppercase text-xs">Hired</th>';
+    html += '<th class="px-3 py-3 text-center font-medium text-gray-500 uppercase text-xs">Remaining</th>';
+    html += '</tr></thead><tbody class="divide-y divide-gray-100">';
+    for (var i = 0; i < dashboardData.projects.length; i++) {
+      var p = dashboardData.projects[i];
+      var rem = p.total_requested - p.total_hired;
+      if (rem <= 0) continue;
+      html += '<tr class="hover:bg-gray-50"><td class="px-3 py-2 font-medium text-gray-800">' + esc(p.project_name) + '</td>';
+      html += '<td class="px-3 py-2 text-center font-semibold">' + p.total_requested + '</td>';
+      html += '<td class="px-3 py-2 text-center text-green-700 font-semibold">' + p.total_hired + '</td>';
+      html += '<td class="px-3 py-2 text-center text-amber-600 font-semibold">' + rem + '</td></tr>';
+    }
+    html += '</tbody></table></div>';
+    showReport('Remaining Needed Report', html);
+  }
+
+  showDashboard();
+</script>

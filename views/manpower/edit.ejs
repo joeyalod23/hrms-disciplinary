@@ -1,0 +1,49 @@
+<div class="container-fluid px-4 py-4">
+  <div class="card border-0 shadow-sm" style="max-width:600px">
+    <div class="card-header bg-white py-3">
+      <h6 class="mb-0 fw-bold"><i class="bi bi-pencil"></i> Edit Manpower Entry</h6>
+    </div>
+    <div class="card-body">
+      <form method="POST" action="/manpower/loading/update/<%= item.id %>">
+        <div class="mb-3">
+          <label class="form-label">Category</label>
+          <select name="category" class="form-select">
+            <option value="Direct" <%= item.category === 'Direct' ? 'selected' : '' %>>Direct</option>
+            <option value="Indirect" <%= item.category === 'Indirect' ? 'selected' : '' %>>Indirect</option>
+          </select>
+        </div>
+        <div class="mb-3">
+          <label class="form-label">Trade / Category Name</label>
+          <input type="text" name="trade" class="form-control" value="<%= item.trade %>" required>
+        </div>
+        <div class="form-check mb-3">
+          <input class="form-check-input" type="checkbox" name="is_subcon" id="isSubcon" value="1" <%= item.is_subcon ? 'checked' : '' %>>
+          <label class="form-check-label" for="isSubcon">Subcontractor</label>
+        </div>
+        <div class="row g-3 mb-3">
+          <div class="col-6">
+            <label class="form-label">Required BOW</label>
+            <input type="number" name="required_bow" class="form-control" value="<%= item.required_bow || 0 %>">
+          </div>
+          <div class="col-6">
+            <label class="form-label">Balance</label>
+            <input type="number" name="balance" class="form-control" value="<%= item.balance || 0 %>">
+          </div>
+        </div>
+        <div class="mb-3">
+          <label class="form-label fw-bold">Period Values</label>
+          <% if (typeof periods !== 'undefined' && periods) { periods.forEach(function(p) { %>
+            <div class="row mb-1 align-items-center">
+              <div class="col-4"><small><%= p.label %></small></div>
+              <div class="col-4"><input type="number" class="form-control form-control-sm" value="<%= (typeof values !== 'undefined' && values[p.id]) ? values[p.id] : 0 %>" disabled></div>
+            </div>
+          <% }); } %>
+        </div>
+        <div class="d-flex gap-2">
+          <button type="submit" class="btn btn-primary">Update</button>
+          <a href="/manpower" class="btn btn-outline-secondary">Cancel</a>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>

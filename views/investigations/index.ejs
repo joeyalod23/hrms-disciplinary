@@ -1,0 +1,68 @@
+<div class="container-fluid px-4 py-4">
+  <div class="d-flex justify-content-between align-items-center mb-4">
+    <h4 class="fw-bold"><i class="bi bi-search"></i> Investigation Reports (F-HRD-035)</h4>
+  </div>
+  <div class="card border-0 shadow-sm">
+    <div class="card-body">
+      <form method="GET" class="row g-2 mb-3">
+        <div class="col-md-3">
+          <input type="text" name="search" class="form-control" placeholder="Search employee, report #, case #..." value="<%= search %>">
+        </div>
+        <div class="col-md-2">
+          <select name="status" class="form-select">
+            <option value="">All Status</option>
+            <option value="Draft" <%= status === 'Draft' ? 'selected' : '' %>>Draft</option>
+            <option value="Submitted" <%= status === 'Submitted' ? 'selected' : '' %>>Submitted</option>
+            <option value="Reviewed" <%= status === 'Reviewed' ? 'selected' : '' %>>Reviewed</option>
+            <option value="Final" <%= status === 'Final' ? 'selected' : '' %>>Final</option>
+          </select>
+        </div>
+        <div class="col-md-1">
+          <button type="submit" class="btn btn-outline-primary w-100"><i class="bi bi-search"></i></button>
+        </div>
+      </form>
+      <div class="table-responsive">
+        <table class="table table-hover">
+          <thead class="table-dark">
+            <tr><th>Report #</th><th>Case #</th><th>Employee</th><th>Investigator</th><th>Verdict</th><th>Status</th><th>Date</th><th>Actions</th></tr>
+          </thead>
+          <tbody>
+            <% if (reports.length === 0) { %>
+              <tr><td colspan="8" class="text-center text-muted py-4">No investigation reports found. Create one from a Disciplinary Case.</td></tr>
+            <% } else { %>
+              <% reports.forEach(r => { %>
+                <tr>
+                  <td><%= r.report_number %></td>
+                  <td><%= r.case_number %></td>
+                  <td><%= r.employee_name %></td>
+                  <td><%= r.investigator %></td>
+                  <td>
+                    <% if (r.is_guilty === 1) { %>
+                      <span class="badge bg-danger">Guilty</span>
+                    <% } else if (r.is_guilty === 0) { %>
+                      <span class="badge bg-success">Not Guilty</span>
+                    <% } else { %>
+                      <span class="badge bg-secondary">Pending</span>
+                    <% } %>
+                  </td>
+                  <td><span class="badge bg-<%= r.status === 'Final' ? 'dark' : r.status === 'Reviewed' ? 'info' : r.status === 'Submitted' ? 'primary' : 'secondary' %>"><%= r.status %></span></td>
+                  <td><%= r.investigation_date ? new Date(r.investigation_date).toLocaleDateString() : 'N/A' %></td>
+                  <td><a href="/investigations/view/<%= r.id %>" class="btn btn-sm btn-outline-primary"><i class="bi bi-eye"></i></a></td>
+                </tr>
+              <% }) %>
+            <% } %>
+          </tbody>
+        </table>
+      </div>
+      <% if (pages > 1) { %>
+        <nav><ul class="pagination pagination-sm">
+          <% for (let i = 1; i <= pages; i++) { %>
+            <li class="page-item <%= i === page ? 'active' : '' %>">
+              <a class="page-link" href="?page=<%= i %><%= status ? '&status=' + status : '' %><%= search ? '&search=' + search : '' %>"><%= i %></a>
+            </li>
+          <% } %>
+        </ul></nav>
+      <% } %>
+    </div>
+  </div>
+</div>

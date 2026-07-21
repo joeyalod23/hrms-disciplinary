@@ -1,0 +1,191 @@
+<div class="container-fluid px-4 py-4">
+  <div class="d-flex justify-content-between align-items-center mb-4">
+    <h4 class="fw-bold"><i class="bi bi-person-badge"></i> Employee 360 Profile</h4>
+    <div>
+      <a href="/employees/edit/<%= employee.id %>" class="btn btn-outline-warning"><i class="bi bi-pencil"></i> Edit</a>
+      <a href="/employees" class="btn btn-outline-secondary"><i class="bi bi-arrow-left"></i> Back</a>
+    </div>
+  </div>
+  <div class="row g-3">
+    <div class="col-md-4">
+      <div class="card border-0 shadow-sm mb-3">
+        <div class="card-body text-center py-4">
+          <div class="display-1 text-muted mb-3"><i class="bi bi-person-circle"></i></div>
+          <h5 class="fw-bold"><%= employee.full_name %></h5>
+          <p class="text-muted mb-1"><%= employee.position %><%= employee.trade ? ' (' + employee.trade + ')' : '' %></p>
+          <span class="badge bg-<%= employee.status === 'Active' ? 'success' : employee.status === 'Resigned' ? 'warning' : employee.status === 'Terminated' ? 'danger' : 'secondary' %> fs-6"><%= employee.status %></span>
+          <hr>
+          <div class="text-start small">
+            <p class="mb-1"><strong>Employee ID:</strong> <%= employee.employee_id %></p>
+            <p class="mb-1"><strong>Department:</strong> <%= employee.department %></p>
+            <p class="mb-1"><strong>Project Site:</strong> <%= employee.project_site %></p>
+            <p class="mb-1"><strong>Classification:</strong> <%= employee.classification %></p>
+            <p class="mb-1"><strong>Date Hired:</strong> <%= employee.date_hired ? new Date(employee.date_hired).toLocaleDateString() : 'N/A' %></p>
+            <p class="mb-1"><strong>Date Ended:</strong> <%= employee.date_ended ? new Date(employee.date_ended).toLocaleDateString() : 'N/A' %></p>
+          </div>
+        </div>
+      </div>
+
+      <div class="card border-0 shadow-sm mb-3">
+        <div class="card-header bg-white py-2"><h6 class="mb-0 fw-bold small">Personal Info</h6></div>
+        <div class="card-body small">
+          <p class="mb-1"><strong>Gender:</strong> <%= employee.gender || 'N/A' %></p>
+          <p class="mb-1"><strong>Birth Date:</strong> <%= employee.birth_date ? new Date(employee.birth_date).toLocaleDateString() : 'N/A' %></p>
+          <p class="mb-1"><strong>Nationality:</strong> <%= employee.nationality || 'N/A' %></p>
+          <p class="mb-1"><strong>Civil Status:</strong> <%= employee.civil_status || 'N/A' %></p>
+          <p class="mb-1"><strong>Religion:</strong> <%= employee.religion || 'N/A' %></p>
+          <p class="mb-1"><strong>Blood Type:</strong> <%= employee.blood_type || 'N/A' %></p>
+        </div>
+      </div>
+
+      <div class="card border-0 shadow-sm mb-3">
+        <div class="card-header bg-white py-2"><h6 class="mb-0 fw-bold small">Contact & Gov't IDs</h6></div>
+        <div class="card-body small">
+          <p class="mb-1"><strong>Contact:</strong> <%= employee.contact_number || 'N/A' %></p>
+          <p class="mb-1"><strong>Email:</strong> <%= employee.email || 'N/A' %></p>
+          <p class="mb-1"><strong>Address:</strong> <%= employee.address || 'N/A' %></p>
+          <hr>
+          <p class="mb-1"><strong>SSS:</strong> <%= employee.sss_no || 'N/A' %></p>
+          <p class="mb-1"><strong>Pag-IBIG:</strong> <%= employee.pagibig_no || 'N/A' %></p>
+          <p class="mb-1"><strong>PhilHealth:</strong> <%= employee.philhealth_no || 'N/A' %></p>
+          <hr>
+          <p class="mb-1"><strong>Daily Rate:</strong> <%= employee.daily_rate ? '\u20B1' + parseFloat(employee.daily_rate).toLocaleString() : 'N/A' %></p>
+          <p class="mb-1"><strong>Monthly Rate:</strong> <%= employee.monthly_rate ? '\u20B1' + parseFloat(employee.monthly_rate).toLocaleString() : 'N/A' %></p>
+          <hr>
+          <p class="mb-1"><strong>Emergency Contact:</strong> <%= employee.emergency_contact || 'N/A' %></p>
+          <p class="mb-1"><strong>Emergency #:</strong> <%= employee.emergency_contact_no || 'N/A' %></p>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-md-8">
+      <div class="card border-0 shadow-sm mb-3">
+        <div class="card-header bg-white py-2 d-flex justify-content-between">
+          <h6 class="mb-0 fw-bold small"><i class="bi bi-folder2-open"></i> Disciplinary Cases (<%= cases.length %>)</h6>
+        </div>
+        <div class="card-body p-0">
+          <div class="table-responsive">
+            <table class="table table-hover mb-0 small">
+              <thead class="table-light">
+                <tr><th>Case #</th><th>Offense</th><th>Severity</th><th>Status</th><th>Date</th><th></th></tr>
+              </thead>
+              <tbody>
+                <% if (cases.length === 0) { %>
+                  <tr><td colspan="6" class="text-center text-muted py-3">No disciplinary cases</td></tr>
+                <% } else { %>
+                  <% cases.forEach(c => { %>
+                  <tr>
+                    <td><a href="/cases/view/<%= c.id %>" class="text-decoration-none"><%= c.case_number %></a></td>
+                    <td><%= c.offense_name || 'N/A' %></td>
+                    <td><span class="badge bg-<%= c.severity === 'Serious' ? 'danger' : c.severity === 'Less Serious' ? 'warning' : 'info' %>"><%= c.severity || 'N/A' %></span></td>
+                    <td><span class="badge bg-<%= c.status === 'Resolved' ? 'success' : c.status === 'Dismissed' ? 'secondary' : c.status === 'For Hearing' ? 'info' : c.status === 'Under Investigation' ? 'warning' : 'primary' %>"><%= c.status %></span></td>
+                    <td><%= new Date(c.created_at).toLocaleDateString() %></td>
+                    <td><a href="/cases/view/<%= c.id %>" class="btn btn-sm btn-outline-info py-0"><i class="bi bi-eye"></i></a></td>
+                  </tr>
+                  <% }) %>
+                <% } %>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <% if (contractAlert) { %>
+      <div class="alert alert-<%= contractAlert.type %> d-flex align-items-center mb-3" role="alert">
+        <i class="bi bi-<%= contractAlert.icon %> me-2 fs-5"></i>
+        <div class="flex-grow-1">
+          <strong>Contract Alert:</strong> <%= contractAlert.message %>
+          <% if (contractAlert.type === 'danger' && contracts.length === 0) { %>
+            <a href="/contracts/add?emp=<%= employee.id %>" class="ms-2 btn btn-sm btn-danger"><i class="bi bi-plus-lg"></i> Create Contract Now</a>
+          <% } %>
+        </div>
+      </div>
+      <% } %>
+
+      <div class="card border-0 shadow-sm mb-3">
+        <div class="card-header bg-white py-2 d-flex justify-content-between">
+          <h6 class="mb-0 fw-bold small"><i class="bi bi-file-earmark-text"></i> Contracts (<%= contracts.length %>)</h6>
+          <a href="/contracts/add?emp=<%= employee.id %>" class="btn btn-sm btn-outline-primary py-0"><i class="bi bi-plus"></i> New</a>
+        </div>
+        <div class="card-body p-0">
+          <div class="table-responsive">
+            <table class="table table-hover mb-0 small">
+              <thead class="table-light">
+                <tr><th>Type</th><th>Start</th><th>End</th><th>Rate</th><th>Status</th></tr>
+              </thead>
+              <tbody>
+                <% if (contracts.length === 0) { %>
+                  <tr><td colspan="5" class="text-center text-muted py-3">No contracts</td></tr>
+                <% } else { %>
+                  <% contracts.forEach(c => { %>
+                  <tr class="<%= c.status === 'Active' && c.end_date && new Date(c.end_date) < new Date() ? 'table-danger' : '' %>">
+                    <td><%= c.contract_type %></td>
+                    <td><%= c.start_date ? new Date(c.start_date).toLocaleDateString() : '--' %></td>
+                    <td><%= c.end_date ? new Date(c.end_date).toLocaleDateString() : '--' %></td>
+                    <td><%= c.daily_rate ? '\u20B1' + parseFloat(c.daily_rate).toLocaleString() + '/day' : 'N/A' %></td>
+                    <td><span class="badge bg-<%= c.status === 'Active' ? 'success' : c.status === 'Expired' ? 'danger' : 'secondary' %>"><%= c.status %></span></td>
+                  </tr>
+                  <% }) %>
+                <% } %>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <div class="row g-3">
+        <div class="col-md-6">
+          <div class="card border-0 shadow-sm">
+            <div class="card-header bg-white py-2"><h6 class="mb-0 fw-bold small"><i class="bi bi-table"></i> Attendance Summary</h6></div>
+            <div class="card-body p-0">
+              <div class="table-responsive">
+                <table class="table table-hover mb-0 small">
+                  <thead class="table-light"><tr><th>Period</th><th>Present</th><th>Tardy</th><th>AWOL</th></tr></thead>
+                  <tbody>
+                    <% if (attendance.length === 0) { %>
+                      <tr><td colspan="4" class="text-center text-muted py-3">No attendance data</td></tr>
+                    <% } else { %>
+                      <% attendance.forEach(a => { %>
+                      <tr>
+                        <td><%= a.month %>/<%= a.year %></td>
+                        <td><%= a.days_present || 0 %>/<%= a.total_working_days || 0 %></td>
+                        <td><%= a.total_tardiness || 0 %> min</td>
+                        <td><%= a.total_awol || 0 %></td>
+                      </tr>
+                      <% }) %>
+                    <% } %>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="col-md-6">
+          <div class="card border-0 shadow-sm">
+            <div class="card-header bg-white py-2"><h6 class="mb-0 fw-bold small"><i class="bi bi-wallet2"></i> Active ATDs</h6></div>
+            <div class="card-body p-0">
+              <div class="table-responsive">
+                <table class="table table-hover mb-0 small">
+                  <thead class="table-light"><tr><th>ATD#</th><th>Total</th><th>Status</th></tr></thead>
+                  <tbody>
+                    <% if (atds.length === 0) { %>
+                      <tr><td colspan="3" class="text-center text-muted py-3">No active ATDs</td></tr>
+                    <% } else { %>
+                      <% atds.forEach(a => { %>
+                      <tr>
+                        <td><%= a.atd_number %></td>
+                        <td>\u20B1<%= parseFloat(a.total_deduction).toLocaleString() %></td>
+                        <td><span class="badge bg-warning">Active</span></td>
+                      </tr>
+                      <% }) %>
+                    <% } %>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

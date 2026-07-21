@@ -1,0 +1,11 @@
+<script>
+function showToast(msg, type) {
+  type = type || 'success';
+  const colors = { success: 'bg-success', error: 'bg-danger', info: 'bg-info' };
+  const el = document.createElement('div');
+  el.className = `position-fixed top-0 end-0 m-3 ${colors[type]} text-white px-4 py-3 rounded-3 shadow-lg small z-3`;
+  el.textContent = msg;
+  document.body.appendChild(el);
+  setTimeout(() => { el.style.opacity = '0'; el.style.transition = 'opacity .3s'; setTimeout(() => el.remove(), 300); }, 3000);
+}
+</script>

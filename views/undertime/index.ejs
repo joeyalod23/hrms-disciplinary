@@ -1,0 +1,57 @@
+<div class="container-fluid px-4 py-4">
+  <div class="d-flex justify-content-between align-items-center mb-4">
+    <h4 class="fw-bold"><i class="bi bi-clock-history"></i> Undertime Calculator</h4>
+  </div>
+
+  <div class="row justify-content-center">
+    <div class="col-md-6 col-lg-5">
+      <div class="card border-0 shadow-sm">
+        <div class="card-body p-4">
+          <p class="text-muted text-center mb-4">Calculate effective work hours based on minutes late</p>
+
+          <div class="alert alert-info text-center py-2 small">
+            <code>(480 &minus; minutes late) &divide; 60</code>
+          </div>
+
+          <div class="mb-4">
+            <label for="minutes" class="form-label fw-medium">Minutes Late</label>
+            <input type="number" id="minutes" class="form-control form-control-lg text-center" min="0" max="480" placeholder="0" autofocus>
+          </div>
+
+          <div class="bg-light rounded-3 p-4 text-center mb-3">
+            <div class="text-muted small text-uppercase fw-semibold tracking-wide">Effective Hours</div>
+            <div class="display-4 fw-bold text-primary" id="result">8.00</div>
+            <div class="text-muted small">hours</div>
+          </div>
+
+          <div class="d-flex justify-content-between text-muted small pt-3 border-top">
+            <span id="minutesDisplay">480 min</span>
+            <span>&minus;</span>
+            <span id="lateDisplay">0 min late</span>
+            <span>=</span>
+            <span id="workedDisplay" class="fw-semibold">480 min</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<% scripts = '<script>' +
+  'var input=document.getElementById(\'minutes\');' +
+  'var result=document.getElementById(\'result\');' +
+  'var minutesDisplay=document.getElementById(\'minutesDisplay\');' +
+  'var lateDisplay=document.getElementById(\'lateDisplay\');' +
+  'var workedDisplay=document.getElementById(\'workedDisplay\');' +
+  'function calculate(){' +
+    'var late=Math.max(0,Math.min(480,parseInt(input.value)||0));' +
+    'var worked=480-late;' +
+    'var hours=worked/60;' +
+    'result.textContent=hours.toFixed(2);' +
+    'minutesDisplay.textContent=\'480 min\';' +
+    'lateDisplay.textContent=late+\' min late\';' +
+    'workedDisplay.textContent=worked+\' min\';' +
+  '}' +
+  'input.addEventListener(\'input\',calculate);' +
+  'calculate();' +
+'</script>' %>

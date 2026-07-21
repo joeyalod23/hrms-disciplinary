@@ -1,0 +1,55 @@
+<div class="container-fluid px-4 py-4">
+  <div class="d-flex justify-content-between align-items-center mb-4">
+    <h4 class="fw-bold"><i class="bi bi-search"></i> Investigation Report</h4>
+    <div>
+      <small class="text-muted me-3">F-HRD-035</small>
+      <a href="/investigations" class="btn btn-outline-secondary"><i class="bi bi-arrow-left"></i> Back</a>
+    </div>
+  </div>
+  <div class="card border-0 shadow-sm">
+    <div class="card-body">
+      <form method="POST" action="<%= report ? '/investigations/edit/' + report.id : '/investigations/add' %>">
+        <div class="row g-3">
+          <div class="col-12">
+            <h6 class="fw-bold text-primary border-bottom pb-2">
+              <i class="bi bi-folder2-open"></i> Case Reference: <%= caseData.case_number %> — <%= caseData.employee_name %>
+            </h6>
+            <input type="hidden" name="case_id" value="<%= caseData.id %>">
+          </div>
+          <div class="col-md-4">
+            <label class="form-label">Investigator *</label>
+            <input type="text" name="investigator" class="form-control" value="<%= report ? report.investigator : '' %>" required>
+          </div>
+          <div class="col-md-4">
+            <label class="form-label">Investigation Date *</label>
+            <input type="date" name="investigation_date" class="form-control" value="<%= report ? report.investigation_date : today %>" required>
+          </div>
+          <div class="col-md-4">
+            <label class="form-label">Findings Verdict *</label>
+            <select name="is_guilty" class="form-select" required>
+              <option value="">-- Select --</option>
+              <option value="1" <%= report && report.is_guilty === 1 ? 'selected' : '' %>>Guilty</option>
+              <option value="0" <%= report && report.is_guilty === 0 ? 'selected' : '' %>>Not Guilty</option>
+            </select>
+          </div>
+          <div class="col-12">
+            <label class="form-label">Findings *</label>
+            <textarea name="findings" class="form-control" rows="5" placeholder="Detailed findings of the investigation..." required><%= report ? report.findings : '' %></textarea>
+          </div>
+          <div class="col-12">
+            <label class="form-label">Conclusion *</label>
+            <textarea name="conclusion" class="form-control" rows="3" placeholder="Conclusion based on findings..." required><%= report ? report.conclusion : '' %></textarea>
+          </div>
+          <div class="col-12">
+            <label class="form-label">Recommended Action</label>
+            <textarea name="recommended_action" class="form-control" rows="2" placeholder="Recommended disciplinary action..."><%= report ? report.recommended_action : '' %></textarea>
+          </div>
+        </div>
+        <div class="mt-4">
+          <button type="submit" class="btn btn-primary"><i class="bi bi-save"></i> <%= report ? 'Update Report' : 'Submit Investigation Report' %></button>
+          <a href="/investigations" class="btn btn-outline-secondary">Cancel</a>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>

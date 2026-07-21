@@ -1,0 +1,110 @@
+<aside class="sidebar d-flex flex-column flex-shrink-0 p-0" id="sidebar">
+  <div class="sidebar-header d-flex align-items-center px-2 py-2">
+    <img src="/images/lv-logo-sidebar.svg" alt="L.V. Ledesma Construction, Inc." class="sidebar-logo">
+  </div>
+  <button class="btn btn-sm btn-dark d-lg-none position-absolute top-0 end-0 m-1" onclick="document.getElementById('sidebar').classList.toggle('show')">
+    <i class="bi bi-x-lg"></i>
+  </button>
+  <div class="sidebar-user px-3 py-1 border-bottom border-secondary">
+    <% if (typeof userBranch !== 'undefined' && userBranch) { %>
+    <div class="d-flex align-items-center gap-1 mb-1">
+      <span class="badge bg-info" style="font-size:0.6rem"><%= userBranch.code %></span>
+      <small class="text-white-50 text-truncate" style="max-width:120px"><%= userBranch.name %></small>
+    </div>
+    <% } else if (typeof isCorporate !== 'undefined' && isCorporate) { %>
+    <div class="d-flex align-items-center gap-1 mb-1">
+      <span class="badge bg-purple" style="font-size:0.6rem;background:#6f42c1">CORP</span>
+      <small class="text-white-50">Corporate View</small>
+    </div>
+    <% } %>
+    <small class="text-white-50"><%= user.full_name %></small>
+    <span class="badge bg-primary" style="font-size:0.6rem"><%= user.role.toUpperCase() %></span>
+  </div>
+  <ul class="nav nav-pills flex-column mb-auto px-2 py-1 sidebar-nav">
+    <li class="nav-item">
+      <a href="/" class="nav-link <%= currentPath === '/' ? 'active' : '' %>">
+        <i class="bi bi-speedometer2"></i> <span>Dashboard</span>
+      </a>
+    </li>
+    <li class="nav-item">
+      <a href="#menu-hr" data-bs-toggle="collapse" class="nav-link <%= currentPath.startsWith('/employees') || currentPath.startsWith('/attendance') || currentPath.startsWith('/manpower') || currentPath.startsWith('/undertime') ? '' : 'collapsed' %>">
+        <i class="bi bi-people"></i> <span>HR Management</span> <i class="bi bi-chevron-down ms-auto"></i>
+      </a>
+      <ul class="nav flex-column collapse <%= currentPath.startsWith('/employees') || currentPath.startsWith('/attendance') || currentPath.startsWith('/manpower') || currentPath.startsWith('/undertime') ? 'show' : '' %>" id="menu-hr">
+        <li><a href="/employees" class="nav-link <%= currentPath.startsWith('/employees') ? 'active' : '' %>"><i class="bi bi-person-badge"></i> Employees</a></li>
+        <li><a href="/attendance" class="nav-link <%= currentPath.startsWith('/attendance') && !currentPath.includes('/consecutive-absences') && !currentPath.includes('/summary') ? 'active' : '' %>"><i class="bi bi-clock"></i> Attendance</a></li>
+        <li><a href="/attendance/consecutive-absences" class="nav-link <%= currentPath.includes('/consecutive-absences') ? 'active' : '' %>"><i class="bi bi-exclamation-triangle"></i> Consecutive Absences</a></li>
+        <li><a href="/attendance/summary" class="nav-link <%= currentPath === '/attendance/summary' ? 'active' : '' %>"><i class="bi bi-table"></i> Summary</a></li>
+        <li><a href="/manpower" class="nav-link <%= currentPath.startsWith('/manpower') ? 'active' : '' %>"><i class="bi bi-diagram-3"></i> Manpower</a></li>
+        <li><a href="/undertime" class="nav-link <%= currentPath.startsWith('/undertime') ? 'active' : '' %>"><i class="bi bi-clock-history"></i> Undertime Calc</a></li>
+        <li><a href="/cases" class="nav-link <%= currentPath.startsWith('/cases') ? 'active' : '' %>"><i class="bi bi-folder2-open"></i> Disciplinary Cases</a></li>
+        <li><a href="/contracts" class="nav-link <%= currentPath.startsWith('/contracts') ? 'active' : '' %>"><i class="bi bi-file-earmark-text"></i> Contracts</a></li>
+      </ul>
+    </li>
+    <li class="nav-item">
+      <a href="#menu-recruit" data-bs-toggle="collapse" class="nav-link <%= currentPath.startsWith('/recruitment') ? '' : 'collapsed' %>">
+        <i class="bi bi-person-plus"></i> <span>Recruitment</span> <i class="bi bi-chevron-down ms-auto"></i>
+      </a>
+      <ul class="nav flex-column collapse <%= currentPath.startsWith('/recruitment') ? 'show' : '' %>" id="menu-recruit">
+        <li><a href="/recruitment" class="nav-link <%= currentPath === '/recruitment' ? 'active' : '' %>"><i class="bi bi-clipboard-check"></i> PRF Requests</a></li>
+        <li><a href="/prf" class="nav-link <%= currentPath === '/prf' ? 'active' : '' %>"><i class="bi bi-graph-up-arrow"></i> PRF Monitor</a></li>
+      </ul>
+    </li>
+    <li class="nav-item">
+      <a href="#menu-ops" data-bs-toggle="collapse" class="nav-link <%= currentPath.startsWith('/fieldchecking') || currentPath.startsWith('/bunkhouse') || currentPath.startsWith('/atd') || currentPath.startsWith('/subcon') ? '' : 'collapsed' %>">
+        <i class="bi bi-building"></i> <span>Site Operations</span> <i class="bi bi-chevron-down ms-auto"></i>
+      </a>
+      <ul class="nav flex-column collapse <%= currentPath.startsWith('/fieldchecking') || currentPath.startsWith('/bunkhouse') || currentPath.startsWith('/atd') || currentPath.startsWith('/subcon') ? 'show' : '' %>" id="menu-ops">
+        <li><a href="/fieldchecking" class="nav-link <%= currentPath.startsWith('/fieldchecking') ? 'active' : '' %>"><i class="bi bi-clipboard-data"></i> Field Checking</a></li>
+        <li><a href="/bunkhouse" class="nav-link <%= currentPath.startsWith('/bunkhouse') ? 'active' : '' %>"><i class="bi bi-house-door"></i> Bunkhouse</a></li>
+        <li><a href="/atd" class="nav-link <%= currentPath.startsWith('/atd') ? 'active' : '' %>"><i class="bi bi-card-checklist"></i> ATD</a></li>
+        <li><a href="/subcon" class="nav-link <%= currentPath.startsWith('/subcon') ? 'active' : '' %>"><i class="bi bi-people"></i> Subcontractors</a></li>
+      </ul>
+    </li>
+    <li class="nav-item">
+      <a href="#menu-disc" data-bs-toggle="collapse" class="nav-link <%= currentPath.startsWith('/incidents') || currentPath.startsWith('/nte') || currentPath.startsWith('/nov') || currentPath.startsWith('/hearings') ? '' : 'collapsed' %>">
+        <i class="bi bi-exclamation-triangle"></i> <span>Disciplinary</span> <i class="bi bi-chevron-down ms-auto"></i>
+      </a>
+      <ul class="nav flex-column collapse <%= currentPath.startsWith('/incidents') || currentPath.startsWith('/nte') || currentPath.startsWith('/nov') || currentPath.startsWith('/hearings') ? 'show' : '' %>" id="menu-disc">
+        <li><a href="/incidents" class="nav-link <%= currentPath.startsWith('/incidents') ? 'active' : '' %>"><i class="bi bi-file-earmark-text"></i> Incident Reports</a></li>
+        <li><a href="/cdaf" class="nav-link <%= currentPath.startsWith('/cdaf') ? 'active' : '' %>"><i class="bi bi-chat-left-dots"></i> CDAF (Reprimand)</a></li>
+        <li><a href="/nte" class="nav-link <%= currentPath.startsWith('/nte') ? 'active' : '' %>"><i class="bi bi-envelope"></i> Notice to Explain</a></li>
+        <li><a href="/nov" class="nav-link <%= currentPath.startsWith('/nov') ? 'active' : '' %>"><i class="bi bi-file-earmark"></i> Notice of Violation</a></li>
+        <li><a href="/investigations" class="nav-link <%= currentPath.startsWith('/investigations') ? 'active' : '' %>"><i class="bi bi-search"></i> Investigation Reports</a></li>
+        <li><a href="/hearings" class="nav-link <%= currentPath.startsWith('/hearings') ? 'active' : '' %>"><i class="bi bi-calendar-event"></i> Hearings</a></li>
+      </ul>
+    </li>
+    <li class="nav-item">
+      <a href="/reports" class="nav-link <%= currentPath.startsWith('/reports') ? 'active' : '' %>">
+        <i class="bi bi-bar-chart"></i> <span>Reports</span>
+      </a>
+    </li>
+    <li class="nav-item">
+      <a href="#menu-docs" data-bs-toggle="collapse" class="nav-link <%= currentPath.startsWith('/vault') || currentPath.startsWith('/compliance') ? '' : 'collapsed' %>">
+        <i class="bi bi-folder"></i> <span>Documents</span> <i class="bi bi-chevron-down ms-auto"></i>
+      </a>
+      <ul class="nav flex-column collapse <%= currentPath.startsWith('/vault') || currentPath.startsWith('/compliance') ? 'show' : '' %>" id="menu-docs">
+        <li><a href="/vault" class="nav-link <%= currentPath.startsWith('/vault') ? 'active' : '' %>"><i class="bi bi-archive"></i> Document Vault</a></li>
+        <li><a href="/compliance" class="nav-link <%= currentPath.startsWith('/compliance') ? 'active' : '' %>"><i class="bi bi-calendar-check"></i> Compliance Calendar</a></li>
+      </ul>
+    </li>
+    <li class="nav-item">
+      <a href="#menu-admin" data-bs-toggle="collapse" class="nav-link <%= currentPath.startsWith('/branches') || currentPath.startsWith('/audit') || currentPath.startsWith('/backup') || currentPath.startsWith('/settings') ? '' : 'collapsed' %>">
+        <i class="bi bi-gear"></i> <span>Administration</span> <i class="bi bi-chevron-down ms-auto"></i>
+      </a>
+      <ul class="nav flex-column collapse <%= currentPath.startsWith('/branches') || currentPath.startsWith('/audit') || currentPath.startsWith('/backup') || currentPath.startsWith('/settings') ? 'show' : '' %>" id="menu-admin">
+        <% if (user.role === 'admin' || user.role === 'hrd') { %>
+        <li><a href="/branches" class="nav-link <%= currentPath.startsWith('/branches') ? 'active' : '' %>"><i class="bi bi-building"></i> Branches</a></li>
+        <% } %>
+        <li><a href="/audit" class="nav-link <%= currentPath.startsWith('/audit') ? 'active' : '' %>"><i class="bi bi-clock-history"></i> Audit Logs</a></li>
+        <li><a href="/backup" class="nav-link <%= currentPath.startsWith('/backup') ? 'active' : '' %>"><i class="bi bi-cloud-arrow-down"></i> Backup</a></li>
+        <% if (user.role === 'admin') { %>
+        <li><a href="/settings" class="nav-link <%= currentPath.startsWith('/settings') ? 'active' : '' %>"><i class="bi bi-sliders"></i> Settings</a></li>
+        <% } %>
+      </ul>
+    </li>
+  </ul>
+  <div class="px-3 py-2 border-top border-secondary">
+    <a href="/logout" class="nav-link text-white-50 small"><i class="bi bi-box-arrow-left"></i> Logout</a>
+  </div>
+</aside>

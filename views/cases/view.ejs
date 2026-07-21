@@ -1,0 +1,565 @@
+﻿<div class="container-fluid px-4 py-4">
+  <div class="d-flex justify-content-between align-items-center mb-4">
+    <h4 class="fw-bold"><i class="bi bi-folder2-open"></i> Disciplinary Case</h4>
+    <div>
+      <a href="/cases/edit/<%= caseData.id %>" class="btn btn-outline-warning"><i class="bi bi-pencil"></i> Edit</a>
+      <a href="/cases" class="btn btn-outline-secondary"><i class="bi bi-arrow-left"></i> Back</a>
+    </div>
+  </div>
+
+  <% if (slaViolations && slaViolations.length > 0) { %>
+    <div class="alert alert-danger py-2">
+      <i class="bi bi-exclamation-triangle-fill"></i> <strong>SLA Violation:</strong>
+      <ul class="mb-0"><% slaViolations.forEach(function(v) { %><li><%= v %></li><% }); %></ul>
+    </div>
+  <% } %>
+
+  <% if (threeStrikeWarning && threeStrikeWarning.cnt >= 2) { %>
+    <div class="alert alert-warning py-2">
+      <i class="bi bi-exclamation-triangle"></i> <strong>Repeat Offender:</strong> This employee has <strong><%= threeStrikeWarning.cnt %></strong> prior cases on record. Consider escalation to higher penalty.
+    </div>
+  <% } %>
+
+  <% if (cdafCount && cdafCount.cnt >= 2) { %>
+    <div class="alert alert-info py-2">
+      <i class="bi bi-info-circle"></i> <strong>3-Strike Notice:</strong> Employee has <%= cdafCount.cnt %> prior CDAF (reprimand) records. This case may warrant escalation per procedure.
+    </div>
+  <% } %>
+
+  <div class="row g-3">
+    <div class="col-md-8">
+      <div class="card border-0 shadow-sm mb-3">
+        <div class="card-header bg-white py-3 d-flex justify-content-between align-items-center">
+          <div>
+            <h6 class="mb-0 fw-bold"><%= caseData.case_number %></h6>
+            <small class="text-muted">Memo No: <strong><%= caseData.memo_number || 'N/A' %></strong></small>
+          </div>
+          <span class="badge bg-<%= caseData.status === 'Resolved' ? 'success' : caseData.status === 'Closed' ? 'dark' : caseData.status === 'Dismissed' ? 'secondary' : caseData.status === 'Appealed' ? 'warning' : caseData.status === 'For Hearing' ? 'info' : caseData.status === 'Under Investigation' ? 'warning' : 'primary' %> fs-6"><%= caseData.status %></span>
+        </div>
+        <div class="card-body">
+          <% if (caseData.verdict_status) { %>
+            <div class="mb-3">
+              <span class="badge bg-<%= caseData.verdict_status === 'Approved' ? 'success' : caseData.verdict_status === 'Rejected' ? 'danger' : 'warning text-dark' %> fs-6">
+                <i class="bi bi-<%= caseData.verdict_status === 'Approved' ? 'check-circle' : caseData.verdict_status === 'Rejected' ? 'x-circle' : 'hourglass' %>"></i>
+                Verdict: <%= caseData.verdict_status %>
+              </span>
+              <% if (caseData.verdict_approved_by) { %>
+                <small class="text-muted ms-2">by <%= caseData.verdict_approved_by %> on <%= caseData.verdict_approved_date ? new Date(caseData.verdict_approved_date).toLocaleDateString() : '' %></small>
+              <% } %>
+              <% if (caseData.verdict_rejection_reason) { %>
+                <br><small class="text-danger"><i class="bi bi-x-circle"></i> Rejection reason: <%= caseData.verdict_rejection_reason %></small>
+              <% } %>
+            </div>
+          <% } %>
+          <div class="row g-3">
+            <div class="col-md-6">
+              <p class="mb-1 text-muted small">Employee</p>
+              <p class="fw-medium"><%= caseData.employee_name %> (<%= caseData.emp_id %>)</p>
+            </div>
+            <div class="col-md-3">
+              <p class="mb-1 text-muted small">Department</p>
+              <p class="fw-medium"><%= caseData.department %></p>
+            </div>
+            <div class="col-md-3">
+              <p class="mb-1 text-muted small">Position</p>
+              <p class="fw-medium"><%= caseData.position %></p>
+            </div>
+            <div class="col-md-4">
+              <p class="mb-1 text-muted small">Violation Classification</p>
+              <p class="fw-medium"><%= caseData.violation_classification || 'N/A' %></p>
+            </div>
+            <div class="col-md-4">
+              <p class="mb-1 text-muted small">Offense</p>
+              <p class="fw-medium"><%= caseData.offense_name || 'N/A' %></p>
+            </div>
+            <div class="col-md-2">
+              <p class="mb-1 text-muted small">Severity</p>
+              <span class="badge bg-<%= caseData.severity === 'Serious' ? 'danger' : caseData.severity === 'Less Serious' ? 'warning' : 'info' %>"><%= caseData.severity || 'N/A' %></span>
+            </div>
+            <div class="col-md-3">
+              <p class="mb-1 text-muted small">Incident Date</p>
+              <p class="fw-medium"><%= new Date(caseData.incident_date).toLocaleDateString() %></p>
+            </div>
+            <div class="col-md-3">
+              <p class="mb-1 text-muted small">Report Date</p>
+              <p class="fw-medium"><%= new Date(caseData.report_date).toLocaleDateString() %></p>
+            </div>
+          </div>
+          <% if (caseData.violation_details) { %>
+          <hr>
+          <p class="mb-1 text-muted small">Violation Details (from Main Office)</p>
+          <p><%= caseData.violation_details %></p>
+          <% } %>
+          <hr>
+          <p class="mb-1 text-muted small">Description</p>
+          <p><%= caseData.description %></p>
+          <% if (caseData.penalty) { %>
+          <hr>
+          <div class="row g-3">
+            <div class="col-md-4">
+              <p class="mb-1 text-muted small">Penalty</p>
+              <p class="fw-medium"><%= caseData.penalty %></p>
+            </div>
+            <% if (caseData.resolution_date) { %>
+            <div class="col-md-3">
+              <p class="mb-1 text-muted small">Resolution Date</p>
+              <p class="fw-medium"><%= new Date(caseData.resolution_date).toLocaleDateString() %></p>
+            </div>
+            <% } %>
+            <% if (caseData.closed_date) { %>
+            <div class="col-md-3">
+              <p class="mb-1 text-muted small">Closed Date</p>
+              <p class="fw-medium"><%= new Date(caseData.closed_date).toLocaleDateString() %></p>
+            </div>
+            <% } %>
+          </div>
+          <% } %>
+          <% if (caseData.incident_report_id) { %>
+          <hr>
+          <div class="row g-3">
+            <div class="col-md-4">
+              <p class="mb-1 text-muted small">Linked Incident Report</p>
+              <p class="fw-medium"><a href="/incidents/view/<%= caseData.incident_report_id %>">View IR #<%= caseData.incident_report_id %></a></p>
+            </div>
+          </div>
+          <% } %>
+          <% if (investigation && investigation.length > 0) { %>
+          <hr>
+          <h6 class="fw-bold text-primary"><i class="bi bi-search"></i> Investigation Report</h6>
+          <% investigation.forEach(function(inv) { %>
+            <div class="d-flex justify-content-between align-items-center border-bottom py-1">
+              <div>
+                <strong><a href="/investigations/view/<%= inv.id %>"><%= inv.report_number %></a></strong>
+                <span class="badge bg-<%= inv.is_guilty === 1 ? 'danger' : inv.is_guilty === 0 ? 'success' : 'secondary' %>">
+                  <%= inv.is_guilty === 1 ? 'Guilty' : inv.is_guilty === 0 ? 'Not Guilty' : 'Pending' %>
+                </span>
+                <small class="text-muted ms-2">by <%= inv.investigator %></small>
+              </div>
+              <span class="badge bg-<%= inv.status === 'Final' ? 'dark' : 'primary' %>"><%= inv.status %></span>
+            </div>
+          <% }); %>
+          <% } %>
+          <small class="text-muted">Created by: <%= caseData.created_by_name || 'System' %> | <%= new Date(caseData.created_at).toLocaleString() %></small>
+        </div>
+      </div>
+      <!-- Appeals Section -->
+      <% if (appeals && appeals.length > 0) { %>
+      <div class="card border-0 shadow-sm mb-3">
+        <div class="card-header bg-white py-3">
+          <h6 class="mb-0 fw-bold"><i class="bi bi-arrow-repeat"></i> Appeals (<%= appeals.length %>)</h6>
+        </div>
+        <div class="card-body p-0">
+          <div class="table-responsive">
+            <table class="table table-hover mb-0">
+              <thead class="table-light"><tr><th>Date</th><th>Reason</th><th>Status</th><th>Decision</th></tr></thead>
+              <tbody>
+                <% appeals.forEach(function(a) { %>
+                  <tr>
+                    <td><%= new Date(a.appeal_date).toLocaleDateString() %></td>
+                    <td><%= a.appeal_reason %></td>
+                    <td><span class="badge bg-<%= a.status === 'Approved' ? 'success' : a.status === 'Denied' ? 'danger' : 'warning' %>"><%= a.status %></span></td>
+                    <td><%= a.decision || '--' %></td>
+                  </tr>
+                <% }); %>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+      <% } %>
+      <div class="card border-0 shadow-sm mb-3">
+        <div class="card-header bg-white py-3">
+          <h6 class="mb-0 fw-bold"><i class="bi bi-calendar-event"></i> Hearings (<%= hearings.length %>)</h6>
+        </div>
+        <div class="card-body p-0">
+          <div class="table-responsive">
+            <table class="table table-hover mb-0">
+              <thead class="table-light"><tr><th>Date</th><th>Time</th><th>Status</th><th>Notes</th></tr></thead>
+              <tbody>
+                <% if (hearings.length === 0) { %>
+                  <tr><td colspan="4" class="text-center text-muted py-3">No hearings scheduled</td></tr>
+                <% } else { %>
+                  <% hearings.forEach(function(h) { %>
+                  <tr>
+                    <td><%= new Date(h.hearing_date).toLocaleDateString() %></td>
+                    <td><%= h.start_time || '--' %> - <%= h.end_time || '--' %></td>
+                    <td><span class="badge bg-<%= h.status === 'Completed' ? 'success' : h.status === 'Cancelled' ? 'secondary' : h.status === 'Ongoing' ? 'warning' : 'primary' %>"><%= h.status %></span></td>
+                    <td><%= h.notes || '--' %></td>
+                  </tr>
+                  <% }) %>
+                <% } %>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+      <div class="card border-0 shadow-sm">
+        <div class="card-header bg-white py-3">
+          <h6 class="mb-0 fw-bold"><i class="bi bi-chat-dots"></i> Case Notes</h6>
+        </div>
+        <div class="card-body">
+          <form method="POST" action="/cases/note/<%= caseData.id %>" class="mb-3">
+            <div class="input-group">
+              <textarea name="note" class="form-control" rows="2" placeholder="Add a note..." required></textarea>
+              <button class="btn btn-primary" type="submit"><i class="bi bi-send"></i></button>
+            </div>
+          </form>
+          <div style="max-height: 300px; overflow-y: auto;">
+            <% if (notes.length === 0) { %>
+              <p class="text-muted text-center py-3">No notes yet</p>
+            <% } else { %>
+              <% notes.forEach(function(n) { %>
+              <div class="border-bottom pb-2 mb-2">
+                <div class="d-flex justify-content-between">
+                  <small class="fw-medium"><%= n.author || 'Unknown' %></small>
+                  <small class="text-muted"><%= new Date(n.created_at).toLocaleString() %></small>
+                </div>
+                <p class="mb-0"><%= n.note %></p>
+              </div>
+              <% }) %>
+            <% } %>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="col-md-4">
+      <div class="card border-0 shadow-sm mb-3">
+        <div class="card-header bg-white py-3">
+          <h6 class="mb-0 fw-bold"><i class="bi bi-arrow-right-square"></i> Workflow</h6>
+        </div>
+        <div class="card-body">
+          <ul class="list-unstyled mb-0">
+            <li class="mb-2"><i class="bi bi-check-circle-fill text-success"></i> <strong>Case Created</strong> <br><small class="text-muted"><%= new Date(caseData.created_at).toLocaleDateString() %></small></li>
+            <li class="mb-2">
+              <% if (caseData.nov_nte_document) { %>
+                <i class="bi bi-check-circle-fill text-success"></i> <strong>NoV+NTE Document</strong> <br>
+                <small><a href="<%= caseData.nov_nte_document %>" target="_blank">View document</a></small>
+              <% } else { %>
+                <i class="bi bi-circle text-muted"></i> <strong>NoV+NTE Document</strong> <br>
+                <small class="text-muted">Not uploaded</small>
+              <% } %>
+            </li>
+            <li class="mb-2">
+              <% if (caseData.needs_investigation === 1) { %>
+                <i class="bi bi-check-circle-fill text-warning"></i> <strong>Decision: Needs Investigation</strong> <br>
+                <small class="text-muted">Investigation required</small>
+              <% } else if (caseData.needs_investigation === 0 && caseData.verdict === 'Not Guilty') { %>
+                <i class="bi bi-check-circle-fill text-success"></i> <strong>Decision: Not Guilty</strong> <br>
+                <small class="text-muted">Case resolved without investigation</small>
+              <% } else { %>
+                <i class="bi bi-circle text-muted"></i> <strong>Decision Gateway</strong> <br>
+                <small class="text-muted">Pending HR assessment</small>
+              <% } %>
+            </li>
+            <li class="mb-2">
+              <% if (caseData.notice_served_date) { %>
+                <i class="bi bi-check-circle-fill text-success"></i> <strong>Notice Served to Employee</strong> <br>
+                <small><%= new Date(caseData.notice_served_date).toLocaleDateString() %></small>
+              <% } else { %>
+                <i class="bi bi-circle text-muted"></i> <strong>Notice Served</strong> <br>
+                <small class="text-muted">Not yet served</small>
+              <% } %>
+            </li>
+            <li class="mb-2">
+              <% if (investigation && investigation.length > 0) { %>
+                <i class="bi bi-check-circle-fill text-success"></i> <strong>Investigation Report</strong> <br>
+                <small><%= investigation.length %> report(s)</small>
+              <% } else { %>
+                <i class="bi bi-circle text-muted"></i> <strong>Investigation Report</strong> <br>
+                <small class="text-muted">Not yet filed</small>
+              <% } %>
+            </li>
+            <li class="mb-2">
+              <% if (hearings.length > 0) { %>
+                <i class="bi bi-check-circle-fill text-success"></i> <strong>Hearing<%= hearings.length > 1 ? 's' : '' %></strong> <br>
+                <small><%= hearings.length %> hearing<%= hearings.length > 1 ? 's' : '' %> scheduled</small>
+              <% } else { %>
+                <i class="bi bi-circle text-muted"></i> <strong>Hearing</strong> <br>
+                <small class="text-muted">Not scheduled</small>
+              <% } %>
+            </li>
+            <li class="mb-2">
+              <% if (caseData.verdict_status === 'Approved') { %>
+                <i class="bi bi-check-circle-fill text-success"></i> <strong>Verdict Approved by Top Mgmt</strong> <br>
+                <small><%= caseData.verdict_approved_by %></small>
+              <% } else if (caseData.verdict_decided_by) { %>
+                <i class="bi bi-check-circle-fill text-warning"></i> <strong>Verdict Pending Approval</strong> <br>
+                <small>Decided by: <%= caseData.verdict_decided_by %></small>
+              <% } else { %>
+                <i class="bi bi-circle text-muted"></i> <strong>Verdict</strong> <br>
+                <small class="text-muted">Pending</small>
+              <% } %>
+            </li>
+            <li>
+              <% if (caseData.status === 'Closed') { %>
+                <i class="bi bi-check-circle-fill text-success"></i> <strong>Closed</strong> <br>
+                <small><%= caseData.closed_date ? new Date(caseData.closed_date).toLocaleDateString() : '' %></small>
+              <% } else { %>
+                <i class="bi bi-circle text-muted"></i> <strong>Closed</strong> <br>
+                <small class="text-muted">Not yet closed</small>
+              <% } %>
+            </li>
+          </ul>
+        </div>
+      </div>
+
+      <!-- DECISION GATEWAY -->
+      <% if (caseData.status === 'Under Investigation' && caseData.needs_investigation === 0 && caseData.needs_investigation !== 1) { %>
+      <div class="card border-0 shadow-sm mb-3">
+        <div class="card-header bg-white py-3">
+          <h6 class="mb-0 fw-bold text-primary"><i class="bi bi-question-diamond"></i> Decision Gateway</h6>
+        </div>
+        <div class="card-body">
+          <p class="small text-muted">Does this case need a formal investigation?</p>
+          <form method="POST" action="/cases/decision-gate/<%= caseData.id %>">
+            <div class="mb-2">
+              <label class="form-label small">Decision Date</label>
+              <input type="date" name="decision_date" class="form-control form-control-sm" value="<%= new Date().toISOString().split('T')[0] %>">
+            </div>
+            <div class="mb-2">
+              <label class="form-label small">Notes / Justification</label>
+              <textarea name="decision_notes" class="form-control form-control-sm" rows="2" placeholder="Why investigation is/is not needed..."></textarea>
+            </div>
+            <div class="d-grid gap-2">
+              <button type="submit" name="needs_investigation" value="1" class="btn btn-warning btn-sm"><i class="bi bi-search"></i> Needs Investigation</button>
+              <button type="submit" name="needs_investigation" value="0" class="btn btn-success btn-sm"><i class="bi bi-check-lg"></i> No Investigation Needed (Not Guilty)</button>
+            </div>
+          </form>
+        </div>
+      </div>
+      <% } %>
+
+      <!-- INVESTIGATION REPORT -->
+      <% if (caseData.needs_investigation === 1 && (!investigation || investigation.length === 0)) { %>
+      <div class="card border-0 shadow-sm mb-3">
+        <div class="card-header bg-white py-3">
+          <h6 class="mb-0 fw-bold text-primary"><i class="bi bi-search"></i> Investigation Report (F-HRD-035)</h6>
+        </div>
+        <div class="card-body">
+          <p class="small text-muted">File the investigation findings for this case.</p>
+          <a href="/investigations/add/<%= caseData.id %>" class="btn btn-primary btn-sm w-100"><i class="bi bi-plus-lg"></i> Create Investigation Report</a>
+        </div>
+      </div>
+      <% } %>
+
+      <div class="card border-0 shadow-sm mb-3">
+        <div class="card-header bg-white py-3">
+          <h6 class="mb-0 fw-bold"><i class="bi bi-file-earmark"></i> Documents</h6>
+        </div>
+        <div class="card-body">
+          <% if (!caseData.nov_nte_document) { %>
+          <form method="POST" action="/cases/upload-nov/<%= caseData.id %>" enctype="multipart/form-data" class="mb-3">
+            <label class="form-label small">Upload NoV+NTE Scanned Document</label>
+            <div class="input-group input-group-sm">
+              <input type="file" name="nov_nte_document" class="form-control" required>
+              <button class="btn btn-success" type="submit"><i class="bi bi-upload"></i></button>
+            </div>
+          </form>
+          <% } %>
+          <form method="POST" action="/documents/upload/<%= caseData.id %>" enctype="multipart/form-data" class="mb-2">
+            <div class="mb-1">
+              <select name="document_type" class="form-select form-select-sm" required>
+                <option value="">Document Type</option>
+                <option value="Incident Report">Incident Report</option>
+                <option value="Notice to Explain">Notice to Explain</option>
+                <option value="Notice of Violation">Notice of Violation</option>
+                <option value="Investigation Report">Investigation Report</option>
+                <option value="Verdict">Verdict</option>
+                <option value="Appeal">Appeal</option>
+                <option value="Other">Other</option>
+              </select>
+            </div>
+            <div class="input-group input-group-sm">
+              <input type="file" name="document" class="form-control" required>
+              <button class="btn btn-primary" type="submit"><i class="bi bi-upload"></i></button>
+            </div>
+          </form>
+          <hr>
+          <div style="max-height: 300px; overflow-y: auto;">
+            <% if (documents.length === 0) { %>
+              <p class="text-muted text-center py-3">No documents uploaded</p>
+            <% } else { %>
+              <% documents.forEach(function(d) { %>
+              <div class="d-flex justify-content-between align-items-center border-bottom py-1">
+                <div>
+                  <small class="fw-medium"><%= d.document_type %></small>
+                  <br><small class="text-muted"><%= d.original_name %></small>
+                </div>
+                <div>
+                  <a href="<%= d.file_path %>" class="btn btn-sm btn-outline-info" target="_blank" title="View"><i class="bi bi-eye"></i></a>
+                  <a href="/documents/delete/<%= d.id %>" class="btn btn-sm btn-outline-danger" title="Delete" onclick="return confirm('Delete?')"><i class="bi bi-trash"></i></a>
+                </div>
+              </div>
+              <% }) %>
+            <% } %>
+          </div>
+        </div>
+      </div>
+
+      <div class="card border-0 shadow-sm mb-3">
+        <div class="card-header bg-white py-3">
+          <h6 class="mb-0 fw-bold"><i class="bi bi-send"></i> Serve Notice to Employee</h6>
+        </div>
+        <div class="card-body">
+          <% if (!caseData.notice_served_date) { %>
+          <form method="POST" action="/cases/serve/<%= caseData.id %>">
+            <div class="mb-2">
+              <label class="form-label small">Date Served</label>
+              <input type="date" name="notice_served_date" class="form-control form-control-sm" value="<%= new Date().toISOString().split('T')[0] %>" required>
+            </div>
+            <div class="mb-2">
+              <label class="form-label small">Received By (employee name)</label>
+              <input type="text" name="notice_received_by" class="form-control form-control-sm" value="<%= caseData.employee_name %>">
+            </div>
+            <div class="mb-2">
+              <label class="form-label small">Date Received</label>
+              <input type="date" name="notice_received_date" class="form-control form-control-sm" value="<%= new Date().toISOString().split('T')[0] %>">
+            </div>
+            <button type="submit" class="btn btn-warning btn-sm w-100"><i class="bi bi-send"></i> Record Notice Served</button>
+          </form>
+          <% } else { %>
+          <div class="alert alert-success py-2">
+            <small><i class="bi bi-check-circle"></i> Served: <%= new Date(caseData.notice_served_date).toLocaleDateString() %><br>
+            Received by: <%= caseData.notice_received_by || 'N/A' %><br>
+            Date received: <%= caseData.notice_received_date ? new Date(caseData.notice_received_date).toLocaleDateString() : 'N/A' %></small>
+          </div>
+          <% } %>
+        </div>
+      </div>
+
+      <!-- VERDICT FORM -->
+      <% if (caseData.status !== 'Resolved' && caseData.status !== 'Closed' && caseData.status !== 'Appealed') { %>
+      <div class="card border-0 shadow-sm mb-3">
+        <div class="card-header bg-white py-3">
+          <h6 class="mb-0 fw-bold"><i class="bi bi-gavel"></i> Verdict / Resolution</h6>
+        </div>
+        <div class="card-body">
+          <form method="POST" action="/cases/verdict/<%= caseData.id %>">
+            <div class="mb-2">
+              <label class="form-label small">Penalty</label>
+              <input type="text" name="penalty" class="form-control form-control-sm" value="<%= caseData.penalty || '' %>" placeholder="e.g. 3 days suspension, Written Warning">
+            </div>
+            <hr>
+            <h6 class="fw-bold text-primary small">Verdict Signatories</h6>
+            <div class="mb-1">
+              <label class="form-label small">Decided By (Main Office)</label>
+              <input type="text" name="verdict_decided_by" class="form-control form-control-sm" value="<%= caseData.verdict_decided_by || '' %>" placeholder="Authority who decided">
+            </div>
+            <div class="mb-1">
+              <label class="form-label small">Served By (at site)</label>
+              <input type="text" name="verdict_served_by" class="form-control form-control-sm" value="<%= caseData.verdict_served_by || '' %>" placeholder="HR who served at site">
+            </div>
+            <div class="mb-1">
+              <label class="form-label small">Received By (accused)</label>
+              <input type="text" name="verdict_received_by" class="form-control form-control-sm" value="<%= caseData.verdict_received_by || '' %>" placeholder="Employee">
+            </div>
+            <div class="mb-2">
+              <label class="form-label small">Date Received</label>
+              <input type="date" name="verdict_received_date" class="form-control form-control-sm" value="<%= caseData.verdict_received_date || '' %>">
+            </div>
+            <button type="submit" class="btn btn-success btn-sm w-100"><i class="bi bi-gavel"></i> Submit Verdict (Pending Approval)</button>
+          </form>
+        </div>
+      </div>
+      <% } %>
+
+      <!-- TOP MANAGEMENT APPROVAL GATE -->
+      <% if (caseData.verdict_status === 'Pending Top Mgmt Approval') { %>
+      <div class="card border-0 shadow-sm mb-3">
+        <div class="card-header bg-white py-3">
+          <h6 class="mb-0 fw-bold text-purple" style="color:#6f42c1"><i class="bi bi-shield-check"></i> Top Management Approval</h6>
+        </div>
+        <div class="card-body">
+          <p class="small text-muted">Approve or reject the final verdict for this case.</p>
+          <form method="POST" action="/cases/approve-verdict/<%= caseData.id %>" class="mb-3">
+            <div class="mb-2">
+              <label class="form-label small">Approved By</label>
+              <input type="text" name="verdict_approved_by" class="form-control form-control-sm" placeholder="Top Management name">
+            </div>
+            <div class="mb-2">
+              <label class="form-label small">Approval Date</label>
+              <input type="date" name="verdict_approved_date" class="form-control form-control-sm" value="<%= new Date().toISOString().split('T')[0] %>">
+            </div>
+            <button type="submit" class="btn btn-success btn-sm w-100"><i class="bi bi-check-lg"></i> Approve Verdict</button>
+          </form>
+          <form method="POST" action="/cases/reject-verdict/<%= caseData.id %>">
+            <div class="mb-2">
+              <label class="form-label small">Rejection Reason</label>
+              <textarea name="verdict_rejection_reason" class="form-control form-control-sm" rows="2" placeholder="Why was it rejected?"></textarea>
+            </div>
+            <button type="submit" class="btn btn-danger btn-sm w-100"><i class="bi bi-x-lg"></i> Reject & Send Back</button>
+          </form>
+        </div>
+      </div>
+      <% } %>
+
+      <!-- APPEAL -->
+      <% if (caseData.status === 'Resolved' && caseData.verdict_status === 'Approved') { %>
+      <div class="card border-0 shadow-sm mb-3">
+        <div class="card-header bg-white py-3">
+          <h6 class="mb-0 fw-bold text-warning"><i class="bi bi-arrow-repeat"></i> Employee Appeal</h6>
+        </div>
+        <div class="card-body">
+          <form method="POST" action="/cases/appeal/<%= caseData.id %>">
+            <div class="mb-2">
+              <label class="form-label small">Appeal Date</label>
+              <input type="date" name="appeal_date" class="form-control form-control-sm" value="<%= new Date().toISOString().split('T')[0] %>" required>
+            </div>
+            <div class="mb-2">
+              <label class="form-label small">Appeal Reason *</label>
+              <textarea name="appeal_reason" class="form-control form-control-sm" rows="3" placeholder="Employee's reason for appeal..." required></textarea>
+            </div>
+            <button type="submit" class="btn btn-warning btn-sm w-100"><i class="bi bi-send"></i> File Appeal</button>
+          </form>
+        </div>
+      </div>
+      <% } %>
+
+      <!-- RESOLVE APPEAL -->
+      <% if (caseData.status === 'Appealed') { %>
+        <% if (appeals && appeals.length > 0) { %>
+          <% var pendingAppeal = null; for(var i = 0; i < appeals.length; i++) { if (appeals[i].status === 'Pending') { pendingAppeal = appeals[i]; break; } } %>
+          <% if (pendingAppeal) { %>
+          <div class="card border-0 shadow-sm mb-3">
+            <div class="card-header bg-white py-3">
+              <h6 class="mb-0 fw-bold text-warning"><i class="bi bi-arrow-repeat"></i> Resolve Appeal</h6>
+            </div>
+            <div class="card-body">
+              <p class="small"><strong>Reason:</strong> <%= pendingAppeal.appeal_reason %></p>
+              <form method="POST" action="/cases/resolve-appeal/<%= caseData.id %>">
+                <input type="hidden" name="appeal_id" value="<%= pendingAppeal.id %>">
+                <div class="mb-2">
+                  <label class="form-label small">Decision</label>
+                  <select name="status" class="form-select form-select-sm" required>
+                    <option value="">-- Select --</option>
+                    <option value="Approved">Approve Appeal (Overturn Verdict)</option>
+                    <option value="Denied">Deny Appeal (Uphold Verdict)</option>
+                  </select>
+                </div>
+                <div class="mb-2">
+                  <label class="form-label small">Decision Notes</label>
+                  <textarea name="decision" class="form-control form-control-sm" rows="2" placeholder="Justification..."></textarea>
+                </div>
+                <button type="submit" class="btn btn-warning btn-sm w-100"><i class="bi bi-check-lg"></i> Resolve Appeal</button>
+              </form>
+            </div>
+          </div>
+          <% } %>
+        <% } %>
+      <% } %>
+
+      <% if (caseData.status !== 'Closed') { %>
+      <div class="card border-0 shadow-sm">
+        <div class="card-header bg-white py-3">
+          <h6 class="mb-0 fw-bold text-dark"><i class="bi bi-lock"></i> Close Case</h6>
+        </div>
+        <div class="card-body">
+          <form method="POST" action="/cases/close/<%= caseData.id %>" onsubmit="return confirm('Close this disciplinary case?')">
+            <button type="submit" class="btn btn-dark btn-sm w-100"><i class="bi bi-lock"></i> Close Case</button>
+          </form>
+        </div>
+      </div>
+      <% } %>
+    </div>
+  </div>
+</div>

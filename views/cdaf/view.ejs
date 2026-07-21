@@ -1,0 +1,146 @@
+<div class="container-fluid px-4 py-4">
+  <div class="d-flex justify-content-between align-items-center mb-4">
+    <h4 class="fw-bold"><i class="bi bi-chat-left-dots"></i> Corrective Disciplinary Action Form</h4>
+    <div>
+      <small class="text-muted me-3">F-HRD-049</small>
+      <a href="/cdaf" class="btn btn-outline-secondary"><i class="bi bi-arrow-left"></i> Back</a>
+    </div>
+  </div>
+  <div class="row g-3">
+    <div class="col-md-8">
+      <div class="card border-0 shadow-sm mb-3">
+        <div class="card-header bg-white py-3 d-flex justify-content-between align-items-center">
+          <div>
+            <h6 class="mb-0 fw-bold"><%= record.cdaf_number %></h6>
+            <small class="text-muted">Offense #<%= record.offense_number %></small>
+          </div>
+          <span class="badge bg-<%= record.status === 'Open' ? 'primary' : record.status === 'Acknowledged' ? 'info' : 'secondary' %> fs-6"><%= record.status %></span>
+        </div>
+        <div class="card-body">
+          <div class="row g-3">
+            <div class="col-md-6">
+              <p class="mb-1 text-muted small">Employee</p>
+              <p class="fw-medium"><%= record.employee_name %> (<%= record.emp_id %>)</p>
+            </div>
+            <div class="col-md-3">
+              <p class="mb-1 text-muted small">Department</p>
+              <p class="fw-medium"><%= record.department %></p>
+            </div>
+            <div class="col-md-3">
+              <p class="mb-1 text-muted small">Position</p>
+              <p class="fw-medium"><%= record.position %></p>
+            </div>
+          </div>
+          <hr>
+          <div class="row g-3">
+            <div class="col-md-4">
+              <p class="mb-1 text-muted small">Incident Date</p>
+              <p class="fw-medium"><%= new Date(record.incident_date).toLocaleDateString() %></p>
+            </div>
+            <div class="col-md-4">
+              <p class="mb-1 text-muted small">Action Type</p>
+              <p class="fw-medium"><span class="badge bg-<%= record.action_type === 'Verbal Reprimand' ? 'warning text-dark' : 'danger' %> fs-6"><%= record.action_type %></span></p>
+            </div>
+            <div class="col-md-4">
+              <p class="mb-1 text-muted small">Violation</p>
+              <p class="fw-medium"><%= record.offense_name || 'N/A' %></p>
+            </div>
+          </div>
+          <hr>
+          <h6 class="fw-bold">Description of Offense</h6>
+          <p><%= record.description %></p>
+          <% if (record.counselled_by) { %>
+            <hr>
+            <h6 class="fw-bold text-primary">Counselling Details</h6>
+            <div class="row g-3">
+              <div class="col-md-4">
+                <p class="mb-1 text-muted small">Counselled By</p>
+                <p class="fw-medium"><%= record.counselled_by %></p>
+              </div>
+            </div>
+            <% if (record.counselling_notes) { %>
+              <p><%= record.counselling_notes %></p>
+            <% } %>
+          <% } %>
+          <% if (record.employee_acknowledged) { %>
+            <hr>
+            <h6 class="fw-bold text-success">Employee Acknowledged</h6>
+            <div class="row g-3">
+              <div class="col-md-6">
+                <p class="mb-1 text-muted small">Employee Response</p>
+                <p class="fw-medium"><%= record.employee_response || 'No response provided' %></p>
+              </div>
+              <div class="col-md-3">
+                <p class="mb-1 text-muted small">Acknowledged Date</p>
+                <p class="fw-medium"><%= record.acknowledged_date ? new Date(record.acknowledged_date).toLocaleDateString() : 'N/A' %></p>
+              </div>
+            </div>
+          <% } %>
+        </div>
+      </div>
+      <% if (priorCdafs.length > 0) { %>
+        <div class="card border-0 shadow-sm mb-3">
+          <div class="card-header bg-white py-3">
+            <h6 class="mb-0 fw-bold"><i class="bi bi-clock-history"></i> Prior CDAF Records for <%= record.employee_name %></h6>
+          </div>
+          <div class="card-body">
+            <div class="table-responsive">
+              <table class="table table-sm">
+                <thead><tr><th>CDAF #</th><th>Date</th><th>Action</th><th>Violation</th><th>Status</th></tr></thead>
+                <tbody>
+                  <% priorCdafs.forEach(pc => { %>
+                    <tr>
+                      <td><a href="/cdaf/view/<%= pc.id %>"><%= pc.cdaf_number %></a></td>
+                      <td><%= new Date(pc.incident_date).toLocaleDateString() %></td>
+                      <td><%= pc.action_type %></td>
+                      <td><%= pc.offense_name || 'N/A' %></td>
+                      <td><%= pc.status %></td>
+                    </tr>
+                  <% }) %>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      <% } %>
+    </div>
+    <div class="col-md-4">
+      <% if (record.status === 'Open') { %>
+        <div class="card border-0 shadow-sm mb-3">
+          <div class="card-header bg-white py-3"><h6 class="mb-0 fw-bold text-success"><i class="bi bi-check-circle"></i> Employee Acknowledgement</h6></div>
+          <div class="card-body">
+            <form method="POST" action="/cdaf/acknowledge/<%= record.id %>">
+              <div class="mb-2">
+                <label class="form-label small">Employee Response (Optional)</label>
+                <textarea name="employee_response" class="form-control form-control-sm" rows="3" placeholder="Employee's written response..."></textarea>
+              </div>
+              <div class="mb-2">
+                <label class="form-label small">Acknowledgement Date</label>
+                <input type="date" name="acknowledged_date" class="form-control form-control-sm" value="<%= new Date().toISOString().split('T')[0] %>">
+              </div>
+              <button type="submit" class="btn btn-success btn-sm w-100"><i class="bi bi-check-lg"></i> Acknowledge & Close</button>
+            </form>
+          </div>
+        </div>
+        <div class="card border-0 shadow-sm mb-3">
+          <div class="card-header bg-white py-3"><h6 class="mb-0 fw-bold text-danger"><i class="bi bi-trash"></i> Danger Zone</h6></div>
+          <div class="card-body">
+            <form method="POST" action="/cdaf/delete/<%= record.id %>" onsubmit="return confirm('Delete this CDAF?')">
+              <button type="submit" class="btn btn-outline-danger btn-sm w-100"><i class="bi bi-trash"></i> Delete</button>
+            </form>
+          </div>
+        </div>
+      <% } %>
+      <% if (record.status === 'Acknowledged') { %>
+        <div class="card border-0 shadow-sm mb-3">
+          <div class="card-header bg-white py-3"><h6 class="mb-0 fw-bold"><i class="bi bi-lock"></i> Close Record</h6></div>
+          <div class="card-body">
+            <form method="POST" action="/cdaf/close/<%= record.id %>">
+              <button type="submit" class="btn btn-dark btn-sm w-100"><i class="bi bi-check2-all"></i> Close CDAF</button>
+            </form>
+          </div>
+        </div>
+      <% } %>
+    </div>
+  </div>
+</div>

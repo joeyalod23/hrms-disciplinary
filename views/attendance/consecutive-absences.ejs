@@ -1,0 +1,106 @@
+<div class="container-fluid px-4 py-4">
+  <div class="d-flex justify-content-between align-items-center mb-4">
+    <h4 class="fw-bold"><i class="bi bi-exclamation-triangle text-warning"></i> Consecutive Absences (3-5 Days)</h4>
+    <div>
+      <a href="/attendance" class="btn btn-outline-secondary"><i class="bi bi-arrow-left"></i> Back to Records</a>
+      <a href="/attendance/consecutive-absences?refresh=1" class="btn btn-warning"><i class="bi bi-arrow-clockwise"></i> Refresh / Re-check</a>
+    </div>
+  </div>
+
+  <div class="card border-0 shadow-sm mb-4">
+    <div class="card-header bg-white py-3">
+      <h5 class="fw-bold mb-0"><i class="bi bi-flag me-2"></i>Employees with 3-5 Consecutive Days of Absence</h5>
+    </div>
+    <div class="card-body">
+      <% if (records.length === 0) { %>
+        <div class="text-center py-5">
+          <i class="bi bi-check-circle text-success" style="font-size:3rem"></i>
+          <p class="text-muted mt-2">No employees with 3-5 consecutive absences found.</p>
+        </div>
+      <% } else { %>
+        <div class="table-responsive">
+          <table class="table table-sm table-hover mb-0">
+            <thead class="table-light">
+              <tr>
+                <th>Emp ID</th>
+                <th>Name</th>
+                <th>Position</th>
+                <th>Department</th>
+                <th>Consecutive Days</th>
+                <th>Date Range</th>
+                <th>Statuses</th>
+                <th>Action</th>
+              </tr>
+            </thead>
+            <tbody>
+              <% records.forEach(function(r) { %>
+                <tr class="<%= r.days >= 5 ? 'table-danger' : 'table-warning' %>">
+                  <td><%= r.employee_id %></td>
+                  <td class="fw-medium"><%= r.full_name %></td>
+                  <td><%= r.position || '-' %></td>
+                  <td><%= r.department || '-' %></td>
+                  <td>
+                    <span class="badge bg-<%= r.days >= 5 ? 'danger' : 'warning' %> fs-6">
+                      <%= r.days %> days
+                    </span>
+                  </td>
+                  <td><%= r.start_date %> → <%= r.end_date %></td>
+                  <td>
+                    <% (r.statuses || []).forEach(function(s) { %>
+                      <span class="badge bg-<%= s === 'Absent' ? 'danger' : s === 'No Record' ? 'secondary' : 'info' %> me-1"><%= s %></span>
+                    <% }) %>
+                  </td>
+                  <td>
+                    <a href="/attendance/edit/<%= r.record_id || '' %>" class="btn btn-sm btn-outline-primary" title="View Record"><i class="bi bi-eye"></i></a>
+                  </td>
+                </tr>
+              <% }) %>
+            </tbody>
+          </table>
+        </div>
+        <p class="text-muted small mt-2">
+          <span class="badge bg-warning">Warning</span> 3-4 consecutive days |
+          <span class="badge bg-danger">Danger</span> 5 consecutive days
+        </p>
+      <% } %>
+    </div>
+  </div>
+
+  <div class="card border-0 shadow-sm">
+    <div class="card-header bg-white py-3">
+      <h5 class="fw-bold mb-0"><i class="bi bi-clock-history me-2"></i>Flagged in Attendance Exceptions</h5>
+    </div>
+    <div class="card-body">
+      <% if (exceptions.length === 0) { %>
+        <p class="text-muted text-center py-3">No attendance exceptions flagged.</p>
+      <% } else { %>
+        <div class="table-responsive">
+          <table class="table table-sm table-hover mb-0">
+            <thead class="table-light">
+              <tr>
+                <th>Employee</th>
+                <th>Type</th>
+                <th>Start Date</th>
+                <th>End Date</th>
+                <th>Days Missed</th>
+                <th>Status</th>
+              </tr>
+            </thead>
+            <tbody>
+              <% exceptions.forEach(function(ex) { %>
+                <tr>
+                  <td><%= ex.employee_name || 'ID: ' + ex.employee_id %></td>
+                  <td><span class="badge bg-danger"><%= ex.exception_type %></span></td>
+                  <td><%= ex.start_date %></td>
+                  <td><%= ex.end_date %></td>
+                  <td><%= ex.days_missed %></td>
+                  <td><span class="badge bg-<%= ex.status === 'Open' ? 'warning' : 'success' %>"><%= ex.status %></span></td>
+                </tr>
+              <% }) %>
+            </tbody>
+          </table>
+        </div>
+      <% } %>
+    </div>
+  </div>
+</div>
